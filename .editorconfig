@@ -2,3 +2,6 @@ root = true
 
 [*]
 charset = utf-8
+
+[*.cs]
+resharper_place_attribute_on_same_line = false
