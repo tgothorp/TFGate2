@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://cjresamnoqj5v"]
+
+[ext_resource type="Script" uid="uid://bjd1cru3c2g5k" path="res://scripts/grid/GridManager.cs" id="1_do16o"]
+[ext_resource type="Script" uid="uid://cbd28ffi44gyc" path="res://scripts/grid/GridDebugRenderer.cs" id="2_e8itd"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e8itd"]
+shading_mode = 0
+albedo_color = Color(0, 0.972549, 0.7019608, 1)
+
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_b3auv"]
+
+[node name="Grid" type="Node3D" unique_id=1125324466]
+script = ExtResource("1_do16o")
+
+[node name="GridRenderer" type="Node3D" parent="." unique_id=1625273638]
+script = ExtResource("2_e8itd")
+LineColor = Color(0, 0.972549, 0.7019608, 1)
+
+[node name="@MeshInstance3D@27301" type="MeshInstance3D" parent="GridRenderer" unique_id=920440686]
+material_override = SubResource("StandardMaterial3D_e8itd")
+mesh = SubResource("ImmediateMesh_b3auv")

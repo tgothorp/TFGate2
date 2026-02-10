@@ -2,62 +2,156 @@ using Godot;
 
 namespace TFGate2.scripts.grid;
 
+[Tool]
 public partial class GridDebugRenderer : Node3D
 {
     [Export]
-    public float YOffset { get; set; } = 0.02f;
-
-    [Export]
-    public float Thickness { get; set; } = 0.02f;
-
-    [Export]
-    public bool ShouldRender { get; set; } = true;
-
-    private MultiMeshInstance3D _mmi = default!;
-
-    public override void _Ready()
+    public new bool Show
     {
-        _mmi = new MultiMeshInstance3D();
-        AddChild(_mmi);
-
-        var box = new BoxMesh();
-
-        _mmi.Multimesh = new MultiMesh
+        get => _show;
+        set
         {
-            TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
-            Mesh = box
-        };
-
-        Visible = ShouldRender;
+            _show = value;
+            ApplyVisibility();
+            RebuildDeferred();
+        }
     }
 
-    public void Rebuild(GridManager grid)
+    [Export]
+    public float YOffset
     {
-        if (_mmi.Multimesh == null)
+        get => _yOffset;
+        set
+        {
+            _yOffset = value;
+            RebuildDeferred();
+        }
+    }
+
+    [Export]
+    public Color LineColor
+    {
+        get => _lineColor;
+        set
+        {
+            _lineColor = value;
+            RebuildDeferred();
+        }
+    }
+
+    [ExportToolButton("Redraw Grid")]
+    public Callable RedrawGrid => Callable.From(RebuildDeferred);
+
+    private bool _show = true;
+    private float _yOffset = 0.05f;
+    private Color _lineColor = new(0, 248, 179, 1);
+
+    private MultiMeshInstance3D _mmi;
+    private MultiMesh _mm;
+    private BoxMesh _box;
+    private StandardMaterial3D _mat;
+
+    public override void _EnterTree()
+    {
+        EnsureNodes();
+        ApplyVisibility();
+        RebuildDeferred();
+    }
+
+    private void EnsureNodes()
+    {
+        _mmi ??= new MultiMeshInstance3D();
+        
+        if (_mmi.GetParent() == null) AddChild(_mmi);
+
+        _box = new BoxMesh();
+        _mat = new StandardMaterial3D
+        {
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            AlbedoColor = new Color(0, 1, 0, 1),
+        };
+
+        _mmi.MaterialOverride = _mat;
+
+        _mm = new MultiMesh
+        {
+            TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+            Mesh = _box,
+        };
+        _mmi.Multimesh = _mm;
+    }
+
+    private void ApplyVisibility()
+    {
+        if (_mmi != null && IsInstanceValid(_mmi))
+            _mmi.Visible = _show;
+
+        Visible = _show;
+    }
+
+    private void RebuildDeferred()
+    {
+        if (!IsInsideTree())
             return;
 
-        var count = grid.Width * grid.Height;
-        _mmi.Multimesh.InstanceCount = count;
+        // Defer so it rebuilds after inspector changes settle
+        CallDeferred(nameof(Rebuild));
+    }
 
-        // Make each cell a thin “plate” sized to CellSize
-        var plateScale = new Vector3(grid.CellSize, Thickness, grid.CellSize);
+    public void Rebuild()
+    {
+        EnsureNodes();
 
-        var i = 0;
-        for (var x = 0; x < grid.Width; x++)
+        var grid = GetParent<GridManager>();
+        
+        // Settings (tweak in inspector if you want)
+        float y = YOffset;              // your existing Y offset
+        float thickness = 0.02f;        // width of the “line”
+        float height = 0.02f;           // height of the box
+
+        // Grid extents in grid-local space (assuming your GridToLocal uses (x+0.5)*CellSize centers)
+        // We want line positions on cell boundaries:
+        float minX = 0f;
+        float minZ = 0f;
+        float maxX = grid.Width * grid.CellSize;
+        float maxZ = grid.Height * grid.CellSize;
+
+        int verticalCount = grid.Width + 1;
+        int horizontalCount = grid.Height + 1;
+        int total = verticalCount + horizontalCount;
+
+        _mm.InstanceCount = total;
+
+        int i = 0;
+
+        // Vertical lines: constant X, spanning Z
+        // Position on boundary: x * CellSize
+        // Center should be half way along span.
+        float vSpan = maxZ - minZ;
+        for (int x = 0; x <= grid.Width; x++)
         {
-            for (var z = 0; z < grid.Height; z++)
-            {
-                var coord = new Vector2I(x, z);
+            float lx = x * grid.CellSize;
+            var center = new Vector3(lx, y, minZ + vSpan * 0.5f);
 
-                // Use grid-local centers so the whole grid inherits GridManager transform naturally
-                var localCenter = grid.GridToLocal(coord) + new Vector3(0f, YOffset, 0f);
+            // Scale: thin in X, short in Y, long in Z
+            var scale = new Vector3(thickness, height, vSpan);
 
-                var t = new Transform3D(Basis.Identity, localCenter);
-                t = t.ScaledLocal(plateScale);
+            var t = new Transform3D(Basis.Identity, center).ScaledLocal(scale);
+            _mm.SetInstanceTransform(i++, t);
+        }
 
-                _mmi.Multimesh.SetInstanceTransform(i, t);
-                i++;
-            }
+        // Horizontal lines: constant Z, spanning X
+        float hSpan = maxX - minX;
+        for (int z = 0; z <= grid.Height; z++)
+        {
+            float lz = z * grid.CellSize;
+            var center = new Vector3(minX + hSpan * 0.5f, y, lz);
+
+            // Scale: long in X, short in Y, thin in Z
+            var scale = new Vector3(hSpan, height, thickness);
+
+            var t = new Transform3D(Basis.Identity, center).ScaledLocal(scale);
+            _mm.SetInstanceTransform(i++, t);
         }
     }
 }

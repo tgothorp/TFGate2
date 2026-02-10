@@ -2,6 +2,7 @@ using Godot;
 
 namespace TFGate2.scripts.grid;
 
+[Tool]
 public partial class GridManager : Node3D
 {
     [Export]
@@ -13,15 +14,11 @@ public partial class GridManager : Node3D
     [Export]
     public int Height { get; set; } = 20;
 
-    [Export]
-    public GridDebugRenderer? DebugRenderer { get; set; }
-
-    private GridCell[,] _grid = null!;
+    private GridCell[,] _grid;
 
     public override void _Ready()
     {
         BuildGrid();
-        DebugRenderer?.Rebuild(this);
     }
     
     private void BuildGrid()

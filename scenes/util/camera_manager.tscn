@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://c8m8s72748ebd"]
+
+[ext_resource type="Script" uid="uid://dm328gdxl1mf2" path="res://scripts/camera/CameraManager.cs" id="1_jjaps"]
+
+[node name="CameraPosition" type="Node3D" unique_id=1916404498]
+script = ExtResource("1_jjaps")
+
+[node name="CameraRotationX" type="Node3D" parent="." unique_id=1340119503]
+unique_name_in_owner = true
+
+[node name="CameraZoomPivot" type="Node3D" parent="CameraRotationX" unique_id=1094120700]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.7660444, 0.6427875, 0, -0.6427875, 0.7660444, 0, 3, 4)
+
+[node name="Camera3D" type="Camera3D" parent="CameraRotationX/CameraZoomPivot" unique_id=1657141986]
+unique_name_in_owner = true
