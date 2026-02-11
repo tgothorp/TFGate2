@@ -15,6 +15,10 @@ run/main_scene="uid://bw4r0dd6fip33"
 config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+UserSettings="*uid://d33uio86qnyv6"
+
 [dotnet]
 
 project/assembly_name="TFGate2"

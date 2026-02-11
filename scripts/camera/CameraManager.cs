@@ -19,6 +19,9 @@ public partial class CameraManager : Node3D
     [Export]
     public float MouseSensitivity { get; set; } = 1.5f;
 
+    [Export]
+    public float PanSensitivity { get; set; } = 0.015f;
+
     private Vector3 _moveTarget;
     private float _rotationTarget;
     private float _zoomTarget;
@@ -40,12 +43,30 @@ public partial class CameraManager : Node3D
 
     public override void _UnhandledInput(InputEvent @event)
     {
+        var userSettings = UserSettings.Instance;
+        
         if (@event is InputEventMouseMotion mouseMotion && Input.IsActionPressed("rotate"))
         {
-            _rotationTarget -= mouseMotion.Relative.X - MouseSensitivity;
-            
-            var rotationX = RotationX.RotationDegrees.X - mouseMotion.Relative.Y - MouseSensitivity;
-            RotationX.RotationDegrees = new Vector3(Mathf.Clamp(rotationX, -30, 30), RotationX.RotationDegrees.Y, RotationX.RotationDegrees.Z);
+            switch (userSettings.MiddleMouseCameraAction)
+            {
+                case UserSettings.MiddleMouseAction.Rotate:
+                    {
+                        _rotationTarget -= mouseMotion.Relative.X * MouseSensitivity;
+
+                        var rotationX = RotationX.RotationDegrees.X - mouseMotion.Relative.Y * MouseSensitivity;
+                        RotationX.RotationDegrees = new Vector3(Mathf.Clamp(rotationX, -30, 30), RotationX.RotationDegrees.Y, RotationX.RotationDegrees.Z);
+                        break;
+                    }
+
+                case UserSettings.MiddleMouseAction.Pan:
+                    {
+                        var panDirection = new Vector3(-mouseMotion.Relative.X, 0, -mouseMotion.Relative.Y);
+                        var worldPan = (Transform.Basis * panDirection).Normalized() * panDirection.Length();
+                        _moveTarget += worldPan * PanSensitivity;
+                        break;
+                    }
+
+            }
         }
         
         base._UnhandledInput(@event);
