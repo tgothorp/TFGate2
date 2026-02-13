@@ -2,12 +2,16 @@
 
 [ext_resource type="Script" uid="uid://bjd1cru3c2g5k" path="res://scripts/grid/GridManager.cs" id="1_do16o"]
 [ext_resource type="Script" uid="uid://cbd28ffi44gyc" path="res://scripts/grid/GridDebugRenderer.cs" id="2_e8itd"]
+[ext_resource type="Script" uid="uid://dvsn8mapwa63s" path="res://scripts/grid/GridInputController.cs" id="3_2iype"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e8itd"]
 shading_mode = 0
 albedo_color = Color(0, 0.972549, 0.7019608, 1)
 
 [sub_resource type="ImmediateMesh" id="ImmediateMesh_b3auv"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_w7865"]
+size = Vector3(20, 0.1, 20.001)
 
 [node name="Grid" type="Node3D" unique_id=1125324466]
 script = ExtResource("1_do16o")
@@ -19,3 +23,12 @@ LineColor = Color(0, 0.972549, 0.7019608, 1)
 [node name="@MeshInstance3D@27301" type="MeshInstance3D" parent="GridRenderer" unique_id=920440686]
 material_override = SubResource("StandardMaterial3D_e8itd")
 mesh = SubResource("ImmediateMesh_b3auv")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=83680908]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=836801028]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.985901, 0, 9.999512)
+shape = SubResource("BoxShape3D_w7865")
+
+[node name="GridInputController" type="Node3D" parent="." unique_id=2039915090]
+script = ExtResource("3_2iype")

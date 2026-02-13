@@ -57,4 +57,34 @@ public partial class GridManager : Node3D
         var z = (coordinate.Y + 0.5f) * CellSize;
         return new Vector3(x, 0f, z);
     }
+    
+    /// <summary>
+    /// Converts a world position to grid coordinates. Returns null if outside grid bounds.
+    /// </summary>
+    public Vector2I? WorldToGrid(Vector3 worldPosition)
+    {
+        // Transform world position to local space
+        var localPos = GlobalTransform.AffineInverse() * worldPosition;
+        
+        // Convert to grid coordinates
+        int x = Mathf.FloorToInt(localPos.X / CellSize);
+        int z = Mathf.FloorToInt(localPos.Z / CellSize);
+        
+        // Check bounds
+        if (x < 0 || x >= Width || z < 0 || z >= Height)
+            return null;
+        
+        return new Vector2I(x, z);
+    }
+    
+    /// <summary>
+    /// Gets a grid cell at the specified coordinate. Returns null if out of bounds.
+    /// </summary>
+    public GridCell GetCell(Vector2I coordinate)
+    {
+        if (coordinate.X < 0 || coordinate.X >= Width || coordinate.Y < 0 || coordinate.Y >= Height)
+            return null;
+        
+        return _grid[coordinate.X, coordinate.Y];
+    }
 }

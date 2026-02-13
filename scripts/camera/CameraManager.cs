@@ -11,7 +11,7 @@ public partial class CameraManager : Node3D
     public float MoveSpeed { get; set; } = 0.2f;
 
     [Export]
-    public float RotationSpeed { get; set; } = 4.5f;
+    public float RotationSpeed { get; set; } = 1.5f;
 
     [Export]
     public float ZoomSpeed { get; set; } = 3.0f;
@@ -56,43 +56,39 @@ public partial class CameraManager : Node3D
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        var userSettings = UserSettings.Instance;
-        
         if (@event is InputEventMouseMotion mouseMotion && Input.IsActionPressed("rotate"))
         {
-            switch (userSettings.MiddleMouseCameraAction)
+            // Check if Shift is held to determine pan vs rotate
+            bool isPanning = Input.IsKeyPressed(Key.Shift);
+            
+            if (isPanning)
             {
-                case UserSettings.MiddleMouseAction.Rotate:
-                    {
-                        // Rotate around Y with deadzone + curve
-                        var dx = mouseMotion.Relative.X;
+                // Pan the camera
+                var panDirection = new Vector3(-mouseMotion.Relative.X, 0, -mouseMotion.Relative.Y);
+                var worldPan = (Transform.Basis * panDirection).Normalized() * panDirection.Length();
+                _moveTarget += worldPan * PanSensitivity;
+            }
+            else
+            {
+                // Rotate the camera
+                // Rotate around Y with deadzone + curve
+                var dx = mouseMotion.Relative.X;
 
-                        if (Mathf.Abs(dx) > YawDeadzonePx)
-                        {
-                            var sign = Mathf.Sign(dx);
-                            var mag = Mathf.Abs(dx) - YawDeadzonePx;
+                if (Mathf.Abs(dx) > YawDeadzonePx)
+                {
+                    var sign = Mathf.Sign(dx);
+                    var mag = Mathf.Abs(dx) - YawDeadzonePx;
 
-                            // curve so small movements do less, big movements do more
-                            mag = Mathf.Pow(mag, YawExponent);
+                    // curve so small movements do less, big movements do more
+                    mag = Mathf.Pow(mag, YawExponent);
 
-                            _rotationTarget -= sign * mag * YawSensitivity;
-                        }
+                    _rotationTarget -= sign * mag * YawSensitivity;
+                }
 
-                        // Rotate around X
-                        var dy = mouseMotion.Relative.Y;
-                        var pitch = RotationX.RotationDegrees.X - (dy * PitchSensitivity);
-                        RotationX.RotationDegrees = new Vector3(Mathf.Clamp(pitch, -30, 30), 0, 0);
-                        break;
-                    }
-
-                case UserSettings.MiddleMouseAction.Pan:
-                    {
-                        var panDirection = new Vector3(-mouseMotion.Relative.X, 0, -mouseMotion.Relative.Y);
-                        var worldPan = (Transform.Basis * panDirection).Normalized() * panDirection.Length();
-                        _moveTarget += worldPan * PanSensitivity;
-                        break;
-                    }
-
+                // Rotate around X
+                var dy = mouseMotion.Relative.Y;
+                var pitch = RotationX.RotationDegrees.X - (dy * PitchSensitivity);
+                RotationX.RotationDegrees = new Vector3(Mathf.Clamp(pitch, -45, 35), 0, 0);
             }
         }
 

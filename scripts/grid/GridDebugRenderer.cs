@@ -39,23 +39,66 @@ public partial class GridDebugRenderer : Node3D
         }
     }
 
+    [Export]
+    public bool ShowSelection
+    {
+        get => _showSelection;
+        set
+        {
+            _showSelection = value;
+            RebuildDeferred();
+        }
+    }
+
+    [Export]
+    public Color SelectionColor
+    {
+        get => _selectionColor;
+        set
+        {
+            _selectionColor = value;
+            RebuildDeferred();
+        }
+    }
+
+    [Export]
+    public float SelectionYOffset
+    {
+        get => _selectionYOffset;
+        set
+        {
+            _selectionYOffset = value;
+            RebuildDeferred();
+        }
+    }
+
     [ExportToolButton("Redraw Grid")]
     public Callable RedrawGrid => Callable.From(RebuildDeferred);
 
     private bool _show = true;
     private float _yOffset = 0.05f;
     private Color _lineColor = new(0, 248, 179, 1);
+    private bool _showSelection = true;
+    private Color _selectionColor = new(1f, 1f, 0f, 0.8f);
+    private float _selectionYOffset = 0.08f;
 
     private MultiMeshInstance3D _mmi;
     private MultiMesh _mm;
     private BoxMesh _box;
     private StandardMaterial3D _mat;
+    private MeshInstance3D _selectionHighlight;
+    private GridInputController _inputController;
 
     public override void _EnterTree()
     {
         EnsureNodes();
         ApplyVisibility();
         RebuildDeferred();
+    }
+
+    public override void _Process(double delta)
+    {
+        UpdateSelectionHighlight();
     }
 
     private void EnsureNodes()
@@ -79,6 +122,26 @@ public partial class GridDebugRenderer : Node3D
             Mesh = _box,
         };
         _mmi.Multimesh = _mm;
+
+        // Create selection highlight
+        if (_selectionHighlight == null)
+        {
+            _selectionHighlight = new MeshInstance3D();
+            AddChild(_selectionHighlight);
+            
+            var planeMesh = new PlaneMesh { Size = Vector2.One };
+            var selectionMat = new StandardMaterial3D
+            {
+                AlbedoColor = _selectionColor,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                NoDepthTest = true
+            };
+            
+            _selectionHighlight.Mesh = planeMesh;
+            _selectionHighlight.MaterialOverride = selectionMat;
+            _selectionHighlight.Visible = false;
+        }
     }
 
     private void ApplyVisibility()
@@ -152,6 +215,52 @@ public partial class GridDebugRenderer : Node3D
 
             var t = new Transform3D(Basis.Identity, center).ScaledLocal(scale);
             _mm.SetInstanceTransform(i++, t);
+        }
+    }
+
+    private void UpdateSelectionHighlight()
+    {
+        if (!_showSelection || _selectionHighlight == null)
+        {
+            if (_selectionHighlight != null)
+                _selectionHighlight.Visible = false;
+            return;
+        }
+
+        // Get the input controller if we don't have it yet
+        if (_inputController == null)
+        {
+            var grid = GetParent<GridManager>();
+            if (grid != null)
+            {
+                _inputController = grid.GetNodeOrNull<GridInputController>("GridInputController");
+            }
+        }
+
+        if (_inputController == null)
+            return;
+
+        var selectedCell = _inputController.GetSelectedCell();
+        if (selectedCell.HasValue)
+        {
+            var grid = GetParent<GridManager>();
+            var localPos = grid.GridToLocal(selectedCell.Value);
+            
+            // Update highlight size and position
+            var planeMesh = (PlaneMesh)_selectionHighlight.Mesh;
+            planeMesh.Size = new Vector2(grid.CellSize, grid.CellSize);
+            
+            _selectionHighlight.Position = new Vector3(localPos.X, _selectionYOffset, localPos.Z);
+            
+            // Update color if changed
+            var mat = (StandardMaterial3D)_selectionHighlight.MaterialOverride;
+            mat.AlbedoColor = _selectionColor;
+            
+            _selectionHighlight.Visible = true;
+        }
+        else
+        {
+            _selectionHighlight.Visible = false;
         }
     }
 }
