@@ -26,6 +26,8 @@ public partial class GridManager : Node3D
         }
     }
 
+    public GridCell SelectedCell => _selectedCell;
+
     private GridCell[,] _grid;
     private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
     private GridCell _selectedCell;
@@ -35,7 +37,7 @@ public partial class GridManager : Node3D
     {
         BuildGrid();
     }
-    
+
     private void BuildGrid()
     {
         _grid = new GridCell[Width, Height];
@@ -46,7 +48,7 @@ public partial class GridManager : Node3D
             {
                 var gridCoordinate = new Vector2I(x, z);
                 var worldPosition = GridToWorld(gridCoordinate);
-                
+
                 _grid[x, z] = new GridCell(gridCoordinate, worldPosition);
             }
         }
@@ -61,7 +63,7 @@ public partial class GridManager : Node3D
         var z = (coordinate.Y + 0.5f) * CellSize;
         return GlobalTransform * new Vector3(x, 0f, z);
     }
-    
+
     /// <summary>
     /// Returns the position of a cell in the grid's space, use this
     /// when positioning children of the grid manager.
@@ -72,7 +74,7 @@ public partial class GridManager : Node3D
         var z = (coordinate.Y + 0.5f) * CellSize;
         return new Vector3(x, 0f, z);
     }
-    
+
     /// <summary>
     /// Converts a world position to grid coordinates. Returns null if outside grid bounds.
     /// </summary>
@@ -80,18 +82,18 @@ public partial class GridManager : Node3D
     {
         // Transform world position to local space
         var localPos = GlobalTransform.AffineInverse() * worldPosition;
-        
+
         // Convert to grid coordinates
         int x = Mathf.FloorToInt(localPos.X / CellSize);
         int z = Mathf.FloorToInt(localPos.Z / CellSize);
-        
+
         // Check bounds
         if (x < 0 || x >= Width || z < 0 || z >= Height)
             return null;
-        
+
         return new Vector2I(x, z);
     }
-    
+
     /// <summary>
     /// Gets a grid cell at the specified coordinate. Returns null if out of bounds.
     /// </summary>
@@ -99,8 +101,20 @@ public partial class GridManager : Node3D
     {
         if (coordinate.X < 0 || coordinate.X >= Width || coordinate.Y < 0 || coordinate.Y >= Height)
             return null;
-        
+
         return _grid[coordinate.X, coordinate.Y];
+    }
+
+    /// <summary>
+    /// Sets the currently selected cell (if CanSelectGrid is true)
+    /// </summary>
+    public void SelectCell(Vector2I coordinate)
+    {
+        if (!CanSelectGrid)
+            return;
+
+        _selectedCell = GetCell(coordinate);
+        GD.Print($"Selected cell: {_selectedCell.Coordinate}");
     }
 
     public void AddPawn(GridPawn pawn)
@@ -111,7 +125,7 @@ public partial class GridManager : Node3D
             GD.Print("Pawn not added to grid: out of bounds");
             return;
         }
-        
+
         GD.Print($"Pawn added to grid: {pawn.Name} at {cell.Value}");
         _occupiedPositions[pawn] = cell.Value;
 

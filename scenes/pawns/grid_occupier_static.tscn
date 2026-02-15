@@ -8,6 +8,7 @@
 
 [node name="GridOccupier" type="Node3D" unique_id=1390426964]
 script = ExtResource("1_dtew3")
+ShouldSnapToCellCenter = true
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1554258745]
 

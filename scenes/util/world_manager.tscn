@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://s8aqp1jhpd45"]
+
+[ext_resource type="Script" uid="uid://cp5wnccvyogsn" path="res://scripts/logic/WorldLogic.cs" id="1_r7btl"]
+
+[node name="WorldManager" type="Node3D" unique_id=1136868959]
+script = ExtResource("1_r7btl")

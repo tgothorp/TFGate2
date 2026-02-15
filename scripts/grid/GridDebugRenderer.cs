@@ -88,6 +88,7 @@ public partial class GridDebugRenderer : Node3D
     private StandardMaterial3D _mat;
     private MeshInstance3D _selectionHighlight;
     private GridInputController _inputController;
+    private GridManager _gridManager;
 
     public override void _EnterTree()
     {
@@ -103,6 +104,7 @@ public partial class GridDebugRenderer : Node3D
 
     private void EnsureNodes()
     {
+        _gridManager ??= GetParent<GridManager>();
         _mmi ??= new MultiMeshInstance3D();
         
         if (_mmi.GetParent() == null) AddChild(_mmi);
@@ -164,8 +166,6 @@ public partial class GridDebugRenderer : Node3D
     public void Rebuild()
     {
         EnsureNodes();
-
-        var grid = GetParent<GridManager>();
         
         // Settings (tweak in inspector if you want)
         float y = YOffset;              // your existing Y offset
@@ -176,11 +176,11 @@ public partial class GridDebugRenderer : Node3D
         // We want line positions on cell boundaries:
         float minX = 0f;
         float minZ = 0f;
-        float maxX = grid.Width * grid.CellSize;
-        float maxZ = grid.Height * grid.CellSize;
+        float maxX = _gridManager.Width * _gridManager.CellSize;
+        float maxZ = _gridManager.Height * _gridManager.CellSize;
 
-        int verticalCount = grid.Width + 1;
-        int horizontalCount = grid.Height + 1;
+        int verticalCount = _gridManager.Width + 1;
+        int horizontalCount = _gridManager.Height + 1;
         int total = verticalCount + horizontalCount;
 
         _mm.InstanceCount = total;
@@ -191,9 +191,9 @@ public partial class GridDebugRenderer : Node3D
         // Position on boundary: x * CellSize
         // Center should be half way along span.
         float vSpan = maxZ - minZ;
-        for (int x = 0; x <= grid.Width; x++)
+        for (int x = 0; x <= _gridManager.Width; x++)
         {
-            float lx = x * grid.CellSize;
+            float lx = x * _gridManager.CellSize;
             var center = new Vector3(lx, y, minZ + vSpan * 0.5f);
 
             // Scale: thin in X, short in Y, long in Z
@@ -205,9 +205,9 @@ public partial class GridDebugRenderer : Node3D
 
         // Horizontal lines: constant Z, spanning X
         float hSpan = maxX - minX;
-        for (int z = 0; z <= grid.Height; z++)
+        for (int z = 0; z <= _gridManager.Height; z++)
         {
-            float lz = z * grid.CellSize;
+            float lz = z * _gridManager.CellSize;
             var center = new Vector3(minX + hSpan * 0.5f, y, lz);
 
             // Scale: long in X, short in Y, thin in Z
@@ -240,11 +240,11 @@ public partial class GridDebugRenderer : Node3D
         if (_inputController == null)
             return;
 
-        var selectedCell = _inputController.GetSelectedCell();
-        if (selectedCell.HasValue)
+        var selectedCell = _gridManager.SelectedCell;
+        if (selectedCell != null)
         {
             var grid = GetParent<GridManager>();
-            var localPos = grid.GridToLocal(selectedCell.Value);
+            var localPos = grid.GridToLocal(selectedCell.Coordinate);
             
             // Update highlight size and position
             var planeMesh = (PlaneMesh)_selectionHighlight.Mesh;

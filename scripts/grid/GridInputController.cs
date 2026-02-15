@@ -6,8 +6,7 @@ public partial class GridInputController : Node3D
 {
     private GridManager _gridManager;
     private Camera3D _camera;
-    private Vector2I? _selectedCell;
-    
+
     public override void _Ready()
     {
         _gridManager = GetParent<GridManager>();
@@ -15,7 +14,6 @@ public partial class GridInputController : Node3D
         if (_gridManager == null)
         {
             GD.PrintErr("GridInputController must be a child of GridManager!");
-            return;
         }
     }
     
@@ -55,21 +53,8 @@ public partial class GridInputController : Node3D
             
             if (gridCoord.HasValue)
             {
-                SelectCell(gridCoord.Value);
-                GD.Print($"Selected cell: {gridCoord.Value}");
+                _gridManager.SelectCell(gridCoord.Value);
             }
         }
-    }
-    
-    private void SelectCell(Vector2I coordinate)
-    {
-        _selectedCell = coordinate;
-    }
-    
-    public Vector2I? GetSelectedCell() => _selectedCell;
-    
-    public void ClearSelection()
-    {
-        _selectedCell = null;
     }
 }
