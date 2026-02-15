@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 
 namespace TFGate2.scripts.grid;
 
@@ -14,7 +15,21 @@ public partial class GridManager : Node3D
     [Export]
     public int Height { get; set; } = 20;
 
+    [Export]
+    public bool CanSelectGrid
+    {
+        get => _canSelectGrid;
+        set
+        {
+            _selectedCell = null;
+            _canSelectGrid = value;
+        }
+    }
+
     private GridCell[,] _grid;
+    private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
+    private GridCell _selectedCell;
+    private bool _canSelectGrid = false;
 
     public override void _Ready()
     {
@@ -86,5 +101,23 @@ public partial class GridManager : Node3D
             return null;
         
         return _grid[coordinate.X, coordinate.Y];
+    }
+
+    public void AddPawn(GridPawn pawn)
+    {
+        var cell = WorldToGrid(pawn.GlobalPosition);
+        if (!cell.HasValue)
+        {
+            GD.Print("Pawn not added to grid: out of bounds");
+            return;
+        }
+        
+        GD.Print($"Pawn added to grid: {pawn.Name} at {cell.Value}");
+        _occupiedPositions[pawn] = cell.Value;
+
+        if (pawn.ShouldSnapToCellCenter)
+        {
+            pawn.GlobalPosition = GridToWorld(cell.Value);
+        }
     }
 }

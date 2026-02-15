@@ -111,7 +111,7 @@ public partial class GridDebugRenderer : Node3D
         _mat = new StandardMaterial3D
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            AlbedoColor = new Color(0, 1, 0, 1),
+            AlbedoColor = _lineColor
         };
 
         _mmi.MaterialOverride = _mat;

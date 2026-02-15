@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://cs5y7hnbsrd8b"]
+
+[ext_resource type="Script" uid="uid://bt0nct6cu8a1b" path="res://scripts/pawns/StaticGridPawn.cs" id="1_dtew3"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_a7idl"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_b4kyj"]
+
+[node name="GridOccupier" type="Node3D" unique_id=1390426964]
+script = ExtResource("1_dtew3")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1554258745]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1043211411]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_a7idl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1174328460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_b4kyj")

@@ -11,14 +11,16 @@ albedo_color = Color(0, 0.972549, 0.7019608, 1)
 [sub_resource type="ImmediateMesh" id="ImmediateMesh_b3auv"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_w7865"]
-size = Vector3(20, 0.1, 20.001)
+size = Vector3(40, 0.1, 40)
 
 [node name="Grid" type="Node3D" unique_id=1125324466]
 script = ExtResource("1_do16o")
+CellSize = 2.0
 
 [node name="GridRenderer" type="Node3D" parent="." unique_id=1625273638]
 script = ExtResource("2_e8itd")
-LineColor = Color(0, 0.972549, 0.7019608, 1)
+LineColor = Color(182.00891, 0, 106.23455, 1)
+SelectionColor = Color(1, 1, 0, 1)
 
 [node name="@MeshInstance3D@27301" type="MeshInstance3D" parent="GridRenderer" unique_id=920440686]
 material_override = SubResource("StandardMaterial3D_e8itd")
@@ -27,7 +29,7 @@ mesh = SubResource("ImmediateMesh_b3auv")
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=83680908]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=836801028]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.985901, 0, 9.999512)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.9859, 0, 19.999012)
 shape = SubResource("BoxShape3D_w7865")
 
 [node name="GridInputController" type="Node3D" parent="." unique_id=2039915090]
