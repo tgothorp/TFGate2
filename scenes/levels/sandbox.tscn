@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c8m8s72748ebd" path="res://scenes/util/camera_manager.tscn" id="1_h320y"]
 [ext_resource type="PackedScene" uid="uid://s8aqp1jhpd45" path="res://scenes/util/world_manager.tscn" id="3_a64th"]
 [ext_resource type="PackedScene" uid="uid://cs5y7hnbsrd8b" path="res://scenes/pawns/grid_occupier_static.tscn" id="3_xf1sy"]
+[ext_resource type="PackedScene" uid="uid://clrfkabsjhime" path="res://scenes/util/pawn_manager.tscn" id="4_b4sxl"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h320y"]
 sky_horizon_color = Color(1.4552419, 1.5196301, 1.5474336, 1)
@@ -39,6 +40,9 @@ size = Vector3(55, 1, 56)
 [node name="GridManager" parent="WorldState" unique_id=1125324466 instance=ExtResource("1_6ivci")]
 
 [node name="WorldManager" parent="WorldState" unique_id=1136868959 instance=ExtResource("3_a64th")]
+CurrentSelectableEntities = 2
+
+[node name="PawnManager" parent="WorldState" unique_id=1035608980 instance=ExtResource("4_b4sxl")]
 
 [node name="GridOccupier" parent="." unique_id=1390426964 instance=ExtResource("3_xf1sy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.889301, 0.049999237, 15.834956)
