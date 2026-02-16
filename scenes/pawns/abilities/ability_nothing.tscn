@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://hh5myctfmo7a"]
+
+[ext_resource type="Script" uid="uid://cm7wgwtwk5ura" path="res://scripts/pawns/abilities/NoAbility.cs" id="1_1kjbs"]
+
+[node name="AbilityNothing" type="Node3D" unique_id=673137501]
+script = ExtResource("1_1kjbs")
+AbilityName = "Nothing"
+Cost = 1

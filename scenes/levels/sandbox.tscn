@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://s8aqp1jhpd45" path="res://scenes/util/world_manager.tscn" id="3_a64th"]
 [ext_resource type="PackedScene" uid="uid://cs5y7hnbsrd8b" path="res://scenes/pawns/grid_occupier_static.tscn" id="3_xf1sy"]
 [ext_resource type="PackedScene" uid="uid://clrfkabsjhime" path="res://scenes/util/pawn_manager.tscn" id="4_b4sxl"]
+[ext_resource type="PackedScene" uid="uid://bmvtmkud3gnhv" path="res://scenes/pawns/moveable_pawn.tscn" id="6_qm7gn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h320y"]
 sky_horizon_color = Color(1.4552419, 1.5196301, 1.5474336, 1)
@@ -44,5 +45,78 @@ CurrentSelectableEntities = 2
 
 [node name="PawnManager" parent="WorldState" unique_id=1035608980 instance=ExtResource("4_b4sxl")]
 
-[node name="GridOccupier" parent="." unique_id=1390426964 instance=ExtResource("3_xf1sy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.889301, 0.049999237, 15.834956)
+[node name="StaticPawns" type="Node3D" parent="." unique_id=66928614]
+
+[node name="GridOccupier" parent="StaticPawns" unique_id=1390426964 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8893013, 0.049999237, 6.834956)
+
+[node name="GridOccupier2" parent="StaticPawns" unique_id=645523531 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.889301, 0.049999237, 6.834956)
+
+[node name="GridOccupier3" parent="StaticPawns" unique_id=1575987438 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 6.834956)
+
+[node name="GridOccupier4" parent="StaticPawns" unique_id=901657058 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.889301, 0.049999237, 6.834956)
+
+[node name="GridOccupier5" parent="StaticPawns" unique_id=1819808569 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.889301, 0.049999237, 6.834956)
+
+[node name="GridOccupier6" parent="StaticPawns" unique_id=253042871 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.889301, 0.049999237, 6.834956)
+
+[node name="GridOccupier7" parent="StaticPawns" unique_id=1467184880 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.889301, 0.049999237, 6.834956)
+
+[node name="GridOccupier8" parent="StaticPawns" unique_id=658169165 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.889301, 0.049999237, 8.834956)
+
+[node name="GridOccupier9" parent="StaticPawns" unique_id=1784544069 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.889301, 0.049999237, 10.834956)
+
+[node name="GridOccupier10" parent="StaticPawns" unique_id=956556076 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.889301, 0.049999237, 12.834956)
+
+[node name="GridOccupier11" parent="StaticPawns" unique_id=2017852841 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.889301, 0.049999237, 26.834957)
+
+[node name="GridOccupier12" parent="StaticPawns" unique_id=109334616 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.889301, 0.049999237, 28.834957)
+
+[node name="GridOccupier13" parent="StaticPawns" unique_id=709037498 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.889301, 0.049999237, 30.834957)
+
+[node name="GridOccupier14" parent="StaticPawns" unique_id=1911801599 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.889301, 0.049999237, 30.834957)
+
+[node name="GridOccupier15" parent="StaticPawns" unique_id=171757868 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.889301, 0.049999237, 28.834957)
+
+[node name="GridOccupier16" parent="StaticPawns" unique_id=225869247 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.889301, 0.049999237, 26.834957)
+
+[node name="GridOccupier17" parent="StaticPawns" unique_id=1594081337 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.889301, 0.049999237, 26.834957)
+
+[node name="GridOccupier18" parent="StaticPawns" unique_id=1392709037 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.889301, 0.049999237, 28.834957)
+
+[node name="GridOccupier19" parent="StaticPawns" unique_id=1162819371 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.889301, 0.049999237, 30.834957)
+
+[node name="GridOccupier20" parent="StaticPawns" unique_id=1640618100 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 38.834957)
+
+[node name="GridOccupier21" parent="StaticPawns" unique_id=608674349 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 36.834957)
+
+[node name="GridOccupier22" parent="StaticPawns" unique_id=2096700813 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 34.834957)
+
+[node name="GridOccupier23" parent="StaticPawns" unique_id=541827236 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 32.834957)
+
+[node name="PlayerPawns" type="Node3D" parent="." unique_id=844967900]
+
+[node name="MoveablePawn" parent="PlayerPawns" unique_id=665968329 instance=ExtResource("6_qm7gn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, 15)

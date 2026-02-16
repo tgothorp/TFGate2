@@ -1,22 +1,58 @@
+using System.Collections.Generic;
 using Godot;
 using TFGate2.scripts.grid;
+using TFGate2.scripts.pawns.abilities;
 
 public partial class GridPawn : Node3D
 {
     [Export(hintString: "Should this pawn snap to the center of its cell?")]
     public bool ShouldSnapToCellCenter { get; set; } = false;
-    
+
+    [Export(hintString: "Team this pawn belongs to.")]
+    public WorldLogic.Team Team { get; set; }
+
+    public GridCell OccupiedCell { get; private set; }
+
+    private List<PawnAbility> _pawnAbilities = [];
+
     public override void _Ready()
     {
         var root = GetTree().CurrentScene;
 
+        var worldLogic = root.GetNode<WorldLogic>("WorldState/WorldManager");
         var gridManager = root.GetNode<GridManager>("WorldState/GridManager");
         if (gridManager == null)
         {
-            GD.PrintErr("GridManager not found!");
+            GD.PrintErr("[PAWN] GridManager not found!");
             return;
         }
 
-        gridManager.AddPawn(this);
+        var cell = gridManager.AddPawn(this);
+        if (cell != null)
+        {
+            OccupiedCell = cell;
+        }
+
+        GetAbilities(worldLogic);
+    }
+
+    private List<PawnAbility> GetAbilities(WorldLogic worldLogic)
+    {
+        if (_pawnAbilities.Count > 0)
+            return _pawnAbilities;
+
+        var abilities = GetNode("Abilities").GetChildren();
+        foreach (var ability in abilities)
+        {
+            if (ability is PawnAbility abilityNode)
+            {
+                GD.Print($"[PAWN] {Name} has ability: " + abilityNode.Name);
+                abilityNode.Register(worldLogic, this);
+
+                _pawnAbilities.Add(abilityNode);
+            }
+        }
+
+        return _pawnAbilities;
     }
 }

@@ -5,15 +5,11 @@ using TFGate2.scripts.grid;
 public partial class WorldLogic : Node3D
 {
     [Export]
-    public CurrentSelectable CurrentSelectableEntities
-    {
-        get => _currentSelectableEntities;
-        set => UpdateSelectableEntities(value);
-    }
+    public Team CurrentTeamTurn { get; set; } = Team.World;
 
     private GridManager _gridManager;
     private PawnManager _pawnManager;
-    private CurrentSelectable _currentSelectableEntities;
+    private SelectionState _currentSelectionState = SelectionState.AllPawns;
 
     public override void _Ready()
     {
@@ -34,44 +30,63 @@ public partial class WorldLogic : Node3D
 
         _gridManager = gridManager;
         _pawnManager = pawnManager;
-
-        CurrentSelectableEntities = CurrentSelectable.Nothing;
+        
+        UpdateSelectionState(SelectionState.AllPawns);
     }
 
-    private void UpdateSelectableEntities(CurrentSelectable entities)
+    public void UpdateSelectionState(SelectionState newState)
     {
-        if (_gridManager == null || _pawnManager == null)
-            return;
-
-        _currentSelectableEntities = entities;
-        switch (_currentSelectableEntities)
+        _currentSelectionState = newState;
+        switch (_currentSelectionState)
         {
-            case CurrentSelectable.Grid:
-                _gridManager.CanSelectGrid = true;
-                _pawnManager.CanSelectPawns = false;
-                break;
-            case CurrentSelectable.Pawns:
+            case SelectionState.Nothing:
+                _pawnManager.SelectionMode = PawnSelectionMode.Off;
                 _gridManager.CanSelectGrid = false;
-                _pawnManager.CanSelectPawns = true;
                 break;
-            case CurrentSelectable.Nothing:
+            case SelectionState.BluePawns:
+                _pawnManager.SelectionMode = PawnSelectionMode.TeamBlue;
                 _gridManager.CanSelectGrid = false;
-                _pawnManager.CanSelectPawns = false;
                 break;
-            case CurrentSelectable.GridAndPawns:
+            case SelectionState.RedPawns:
+                _pawnManager.SelectionMode = PawnSelectionMode.TeamRed;
+                _gridManager.CanSelectGrid = false;
+                break;
+            case SelectionState.WorldPawns:
+                _pawnManager.SelectionMode = PawnSelectionMode.NonTeamPawns;
+                _gridManager.CanSelectGrid = false;
+                break;
+            case SelectionState.AllPawns:
+                _pawnManager.SelectionMode = PawnSelectionMode.All;
+                _gridManager.CanSelectGrid = false;
+                break;
+            case SelectionState.Grid:
+                _pawnManager.SelectionMode = PawnSelectionMode.Off;
                 _gridManager.CanSelectGrid = true;
-                _pawnManager.CanSelectPawns = true;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
-
-    public enum CurrentSelectable
+    
+    public enum SelectionState
     {
+        // Nothing in the world can be selected
         Nothing,
+        
+        // Only pawns can be selected
+        BluePawns,
+        RedPawns,
+        WorldPawns,
+        AllPawns,
+        
+        // Only the grid can be selected
         Grid,
-        Pawns,
-        GridAndPawns,
+    }
+    
+    public enum Team
+    {
+        World,
+        Blue,
+        Red,
     }
 }

@@ -1,10 +1,13 @@
 [gd_scene format=3 uid="uid://cs5y7hnbsrd8b"]
 
 [ext_resource type="Script" uid="uid://bt0nct6cu8a1b" path="res://scripts/pawns/StaticGridPawn.cs" id="1_dtew3"]
+[ext_resource type="PackedScene" uid="uid://hh5myctfmo7a" path="res://scenes/pawns/abilities/ability_nothing.tscn" id="2_rm1le"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_a7idl"]
+[sub_resource type="BoxMesh" id="BoxMesh_dtew3"]
+size = Vector3(1, 2, 1)
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_b4kyj"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_rm1le"]
+size = Vector3(1, 2, 1)
 
 [node name="GridOccupier" type="Node3D" unique_id=1390426964]
 script = ExtResource("1_dtew3")
@@ -14,8 +17,12 @@ ShouldSnapToCellCenter = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1043211411]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_a7idl")
+mesh = SubResource("BoxMesh_dtew3")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1174328460]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("CapsuleShape3D_b4kyj")
+shape = SubResource("BoxShape3D_rm1le")
+
+[node name="Abilities" type="Node3D" parent="." unique_id=894898957]
+
+[node name="AbilityNothing" parent="Abilities" unique_id=673137501 instance=ExtResource("2_rm1le")]

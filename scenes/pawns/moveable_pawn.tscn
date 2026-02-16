@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bmvtmkud3gnhv"]
+
+[ext_resource type="Script" uid="uid://bxog3far5m862" path="res://scripts/pawns/PlayerPawn.cs" id="1_lwuor"]
+[ext_resource type="PackedScene" uid="uid://csf5ibsdpxp2v" path="res://scenes/pawns/abilities/ability_move_basic.tscn" id="2_qkjys"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_lwuor"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qkjys"]
+
+[node name="MoveablePawn" type="Node3D" unique_id=665968329]
+script = ExtResource("1_lwuor")
+ShouldSnapToCellCenter = true
+
+[node name="Abilities" type="Node3D" parent="." unique_id=1564304230]
+
+[node name="AbilityMoveBasic" parent="Abilities" unique_id=1470256256 instance=ExtResource("2_qkjys")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=395869465]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=743776710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_lwuor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1074323327]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_qkjys")

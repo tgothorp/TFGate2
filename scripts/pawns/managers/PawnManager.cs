@@ -1,33 +1,30 @@
 using Godot;
-using System;
 
 public partial class PawnManager : Node3D
 {
     [Export]
-    public bool CanSelectPawns
-    {
-        get => _canSelectPawns;
-        set
-        {
-            _selectedPawn = null;
-            _canSelectPawns = value;
-        }
-    }
+    public PawnSelectionMode SelectionMode { get; set; }
 
     private bool _canSelectPawns;
     private GridPawn _selectedPawn;
     
     public void SelectPawn(GridPawn pawn)
     {
-        if (!CanSelectPawns)
+        if (SelectionMode == PawnSelectionMode.Off)
             return;
+        
+        // TODO: Check if pawn is in the correct team
         
         _selectedPawn = pawn;
         GD.Print($"Selected GridPawn: {pawn.Name}");
-
-        if (pawn is StaticGridPawn)
-        {
-            GD.Print($"Selected GridPawn is a static pawn!");
-        }
     }
+}
+
+public enum PawnSelectionMode
+{
+    Off,
+    TeamRed,
+    TeamBlue,
+    NonTeamPawns,
+    All,
 }

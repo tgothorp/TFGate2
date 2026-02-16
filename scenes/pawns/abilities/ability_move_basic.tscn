@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://csf5ibsdpxp2v"]
+
+[ext_resource type="Script" uid="uid://c0g3ypm2p3uo5" path="res://scripts/pawns/abilities/MoveAbility.cs" id="1_4rb3h"]
+
+[node name="AbilityMoveBasic" type="Node3D" unique_id=1470256256]
+script = ExtResource("1_4rb3h")
+AbilityName = "Move"
+Cost = 4
