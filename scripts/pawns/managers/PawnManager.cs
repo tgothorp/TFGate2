@@ -75,6 +75,12 @@ public partial class PawnManager : Node3D
     public void ResolveAbility(GridPawn pawn, GridCell targetCell)
     {
         GD.Print($"Resolving ability '{_selectedAbility.AbilityName}' for {_selectedPawn.Name}, (pawn = {pawn}, targetCell = {targetCell})");
+        
+        if (!_selectedAbility.CanExecute(pawn, targetCell))
+        {
+            GD.PrintErr($"Ability '{_selectedAbility.AbilityName}' cannot be executed for {_selectedPawn.Name}");
+            return;
+        }
     }
 
     private bool CanSelectPawns()

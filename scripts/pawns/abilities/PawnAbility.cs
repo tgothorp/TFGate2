@@ -1,9 +1,9 @@
-using System;
 using Godot;
+using TFGate2.scripts.grid;
 
 namespace TFGate2.scripts.pawns.abilities;
 
-public partial class PawnAbility : Node3D
+public abstract partial class PawnAbility : Node3D
 {
     [Export]
     public string AbilityName { get; set; }
@@ -14,6 +14,12 @@ public partial class PawnAbility : Node3D
     [Export]
     public AbilityCost Cost { get; set; }
 
+    [Export(hintString:"Can this ability target the owner?")]
+    public bool CanTargetSelf { get; set; }
+
+    [Export(hintString:"Can this ability ONLY target the owner?")]
+    public bool CanOnlyTargetSelf { get; set; }
+
     private WorldLogic _worldLogic;
     private GridPawn _owner;
 
@@ -22,6 +28,9 @@ public partial class PawnAbility : Node3D
         _worldLogic = worldLogic;
         _owner = owner;
     }
+
+    public abstract bool CanExecute(GridPawn targetPawn, GridCell targetCell);
+    public abstract void Execute(GridPawn targetPawn, GridCell targetCell);
 
     public enum AbilityCost
     {
