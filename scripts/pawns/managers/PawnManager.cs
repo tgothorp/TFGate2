@@ -4,15 +4,20 @@ using TFGate2.scripts.grid;
 using TFGate2.scripts.pawns.abilities;
 using TFGate2.scripts.pawns.managers;
 
+/// <summary>
+/// Owns pawn/ability selection state and orchestrates ability resolution flow.
+/// </summary>
 public partial class PawnManager : Node3D
 {
     public bool IsResolvingAbility { get; private set; }
+    public GridPawn SelectedPawn => _selectedPawn;
 
     private GridPawn _selectedPawn;
     private PawnAbility _selectedAbility;
     
     private PawnAbilityUiController _abilityUiController;
     private WorldLogic _worldLogic;
+    private GridManager _gridManager;
 
     public override void _Ready()
     {
@@ -27,19 +32,24 @@ public partial class PawnManager : Node3D
         {
             GD.PrintErr("WorldLogic not found!");
         }
+
+        _gridManager = GetParent<WorldLogic>()?.GetNode<GridManager>("GridManager");
+        if (_gridManager == null)
+        {
+            GD.PrintErr("GridManager not found!");
+        }
     }
 
     public override void _UnhandledInput(InputEvent @event)
     {
         if (@event is InputEventMouseButton mouseButton)
         {
-            if (mouseButton.ButtonIndex == MouseButton.Right && mouseButton.Pressed && IsResolvingAbility)
+            if (mouseButton.ButtonIndex == MouseButton.Right && mouseButton.Pressed)
             {
-                GD.Print("Cancel ability resolution");
-
-                IsResolvingAbility = false;
-                _selectedAbility = null;
-                _worldLogic.UpdateSelectionState(WorldLogic.SelectionState.AllPawns);
+                if (IsResolvingAbility)
+                    DeselectAbility();
+                else
+                    DeselectPawn();
             }
         }
 
@@ -74,13 +84,27 @@ public partial class PawnManager : Node3D
 
     public void ResolveAbility(GridPawn pawn, GridCell targetCell)
     {
+        if (_selectedAbility == null || _selectedPawn == null || _worldLogic == null || _gridManager == null)
+            return;
+
         GD.Print($"Resolving ability '{_selectedAbility.AbilityName}' for {_selectedPawn.Name}, (pawn = {pawn}, targetCell = {targetCell})");
-        
-        if (!_selectedAbility.CanExecute(pawn, targetCell))
+
+        var context = new AbilityExecutionContext(
+            _worldLogic,
+            this,
+            _gridManager,
+            _selectedPawn,
+            pawn,
+            targetCell);
+
+        if (!_selectedAbility.CanExecute(context))
         {
             GD.PrintErr($"Ability '{_selectedAbility.AbilityName}' cannot be executed for {_selectedPawn.Name}");
             return;
         }
+
+        _selectedAbility.Execute(context);
+        DeselectAbility();
     }
 
     private bool CanSelectPawns()
@@ -91,5 +115,23 @@ public partial class PawnManager : Node3D
             WorldLogic.SelectionState.EnemyPawns or WorldLogic.SelectionState.TeamPawns or WorldLogic.SelectionState.AllPawns => true,
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    private void DeselectAbility()
+    {
+        GD.Print("Deselecting ability");
+        IsResolvingAbility = false;
+        _selectedAbility = null;
+        _worldLogic.UpdateSelectionState(WorldLogic.SelectionState.AllPawns);
+    }
+    
+    private void DeselectPawn()
+    {
+        GD.Print("Deselecting pawn");
+        IsResolvingAbility = false;
+        _selectedPawn = null;
+        _selectedAbility = null;
+        _abilityUiController.DisplayAbilitiesForPawn(null);
+        _worldLogic.UpdateSelectionState(WorldLogic.SelectionState.AllPawns);
     }
 }

@@ -1,6 +1,9 @@
 using Godot;
 using TFGate2.scripts.utils;
 
+/// <summary>
+/// Handles tactical camera movement, rotation, and zoom input.
+/// </summary>
 public partial class CameraManager : Node3D
 {
     public Node3D RotationX { get; set; }

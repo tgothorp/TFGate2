@@ -7,13 +7,13 @@ namespace TFGate2.scripts.pawns.abilities;
 /// </summary>
 public partial class NoAbility : PawnAbility
 {
-    public override bool CanExecute(GridPawn targetPawn, GridCell targetCell)
+    public override bool CanExecute(AbilityExecutionContext context)
     {
         return false;
     }
 
-    public override void Execute(GridPawn targetPawn, GridCell targetCell)
+    public override void Execute(AbilityExecutionContext context)
     {
-        throw new System.NotImplementedException();
+        // Intentionally empty.
     }
 }

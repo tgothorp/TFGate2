@@ -3,12 +3,16 @@
 [ext_resource type="Script" uid="uid://djvtr23gt73u0" path="res://scripts/pawns/managers/PawnManager.cs" id="1_wo6f7"]
 [ext_resource type="Script" uid="uid://bh14wi8f1wlb4" path="res://scripts/pawns/managers/PawnInputController.cs" id="2_3deoo"]
 [ext_resource type="Script" uid="uid://btjyugubxgb01" path="res://scripts/pawns/managers/PawnAbilityUiController.cs" id="3_6vaap"]
+[ext_resource type="Script" uid="uid://blwue1hrmw4gy" path="res://scripts/pawns/managers/PawnDebugRenderer.cs" id="3_fecds"]
 
 [node name="PawnManager" type="Node3D" unique_id=1035608980]
 script = ExtResource("1_wo6f7")
 
 [node name="PawnInputController" type="Node3D" parent="." unique_id=1743130601]
 script = ExtResource("2_3deoo")
+
+[node name="PawnDebugRender" type="Node3D" parent="." unique_id=493610444]
+script = ExtResource("3_fecds")
 
 [node name="PawnAbilityManager" type="Control" parent="." unique_id=1813439131]
 layout_mode = 3

@@ -3,6 +3,9 @@ using TFGate2.scripts.pawns.abilities;
 
 namespace TFGate2.scripts.pawns.managers;
 
+/// <summary>
+/// Renders the selected pawn's ability list and forwards UI selection to PawnManager.
+/// </summary>
 public partial class PawnAbilityUiController : Control
 {
     private PawnManager _pawnManager;

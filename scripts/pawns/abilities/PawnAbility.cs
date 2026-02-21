@@ -22,15 +22,15 @@ public abstract partial class PawnAbility : Node3D
 
     private WorldLogic _worldLogic;
     private GridPawn _owner;
-
+    
     public void Register(WorldLogic worldLogic, GridPawn owner)
     {
         _worldLogic = worldLogic;
         _owner = owner;
     }
 
-    public abstract bool CanExecute(GridPawn targetPawn, GridCell targetCell);
-    public abstract void Execute(GridPawn targetPawn, GridCell targetCell);
+    public abstract bool CanExecute(AbilityExecutionContext context);
+    public abstract void Execute(AbilityExecutionContext context);
 
     public enum AbilityCost
     {

@@ -1,5 +1,6 @@
 using Godot;
 using TFGate2.scripts.grid;
+using System;
 
 namespace TFGate2.scripts.pawns.abilities;
 
@@ -16,14 +17,31 @@ public partial class MoveAbility : PawnAbility
         base._EnterTree();
     }
 
-    public override bool CanExecute(GridPawn targetPawn, GridCell targetCell)
+    public override bool CanExecute(AbilityExecutionContext context)
     {
-        // TODO
-        return true;
+        if (context.SourcePawn == null || context.TargetCell == null)
+            return false;
+
+        if (context.SourcePawn.OccupiedCell == null || _remainingDistance <= 0)
+            return false;
+
+        return context.GridManager.CanMovePawnToCell(context.SourcePawn, context.TargetCell, _remainingDistance);
     }
 
-    public override void Execute(GridPawn targetPawn, GridCell targetCell)
+    public override void Execute(AbilityExecutionContext context)
     {
-        throw new System.NotImplementedException();
+        if (!CanExecute(context))
+            return;
+
+        var sourceCell = context.SourcePawn.OccupiedCell;
+        var targetCell = context.TargetCell;
+        var movementCost = Mathf.Abs(sourceCell.Coordinate.X - targetCell.Coordinate.X) +
+                           Mathf.Abs(sourceCell.Coordinate.Y - targetCell.Coordinate.Y);
+
+        if (!context.GridManager.TryMovePawnToCell(context.SourcePawn, targetCell))
+            return;
+
+        _remainingDistance = Math.Max(0, _remainingDistance - movementCost);
+        GD.Print($"[ABILITY] Move executed by {context.SourcePawn.Name}. Remaining distance: {_remainingDistance}");
     }
 }

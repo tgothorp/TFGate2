@@ -3,6 +3,9 @@ using System;
 using TFGate2.scripts.grid;
 using TFGate2.scripts.pawns.abilities;
 
+/// <summary>
+/// Coordinates high-level combat state such as turn context and world selection mode.
+/// </summary>
 public partial class WorldLogic : Node3D
 {
     [Export]

@@ -57,6 +57,11 @@ public partial class GridPawn : Node3D
         return _pawnAbilities;
     }
 
+    public void SetOccupiedCell(GridCell cell)
+    {
+        OccupiedCell = cell;
+    }
+
     public override string ToString()
     {
         var abilities = string.Join(", ", _pawnAbilities.Select(x => x.AbilityName));

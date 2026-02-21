@@ -4,6 +4,9 @@ using Godot.Collections;
 namespace TFGate2.scripts.grid;
 
 [Tool]
+/// <summary>
+/// Owns grid topology, cell selection state, and authoritative pawn occupancy/movement.
+/// </summary>
 public partial class GridManager : Node3D
 {
     [Export]
@@ -107,6 +110,48 @@ public partial class GridManager : Node3D
         }
         
         return _grid[cell.Value.X, cell.Value.Y];
+    }
+
+    public bool CanMovePawnToCell(GridPawn pawn, GridCell targetCell, int maxDistance)
+    {
+        if (pawn == null || targetCell == null || pawn.OccupiedCell == null || maxDistance <= 0)
+            return false;
+
+        var currentCoordinate = pawn.OccupiedCell.Coordinate;
+        var targetCoordinate = targetCell.Coordinate;
+        var movementCost = Mathf.Abs(currentCoordinate.X - targetCoordinate.X) +
+                           Mathf.Abs(currentCoordinate.Y - targetCoordinate.Y);
+
+        if (movementCost == 0 || movementCost > maxDistance)
+            return false;
+
+        if (_occupiedPositions.Values.Contains(targetCoordinate))
+            return false;
+
+        return true;
+    }
+
+    public bool TryMovePawnToCell(GridPawn pawn, GridCell targetCell)
+    {
+        if (pawn == null || targetCell == null || pawn.OccupiedCell == null)
+            return false;
+
+        var targetCoordinate = targetCell.Coordinate;
+        if (_occupiedPositions.Values.Contains(targetCoordinate))
+            return false;
+
+        if (!_occupiedPositions.ContainsKey(pawn))
+            return false;
+
+        _occupiedPositions[pawn] = targetCoordinate;
+        pawn.SetOccupiedCell(targetCell);
+
+        if (pawn.ShouldSnapToCellCenter)
+        {
+            pawn.GlobalPosition = GridToWorld(targetCoordinate);
+        }
+
+        return true;
     }
     
     #region Helpers
