@@ -36,14 +36,11 @@ environment = SubResource("Environment_a64th")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.22032, -0.5, 20.09872)
 size = Vector3(55, 1, 56)
 
-[node name="WorldState" type="Node3D" parent="." unique_id=958470040]
+[node name="WorldManager" parent="." unique_id=1136868959 instance=ExtResource("3_a64th")]
 
-[node name="GridManager" parent="WorldState" unique_id=1125324466 instance=ExtResource("1_6ivci")]
+[node name="PawnManager" parent="WorldManager" unique_id=1035608980 instance=ExtResource("4_b4sxl")]
 
-[node name="WorldManager" parent="WorldState" unique_id=1136868959 instance=ExtResource("3_a64th")]
-CurrentSelectableEntities = 2
-
-[node name="PawnManager" parent="WorldState" unique_id=1035608980 instance=ExtResource("4_b4sxl")]
+[node name="GridManager" parent="WorldManager" unique_id=1125324466 instance=ExtResource("1_6ivci")]
 
 [node name="StaticPawns" type="Node3D" parent="." unique_id=66928614]
 

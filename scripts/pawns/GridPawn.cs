@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using TFGate2.scripts.grid;
 using TFGate2.scripts.pawns.abilities;
@@ -19,8 +20,8 @@ public partial class GridPawn : Node3D
     {
         var root = GetTree().CurrentScene;
 
-        var worldLogic = root.GetNode<WorldLogic>("WorldState/WorldManager");
-        var gridManager = root.GetNode<GridManager>("WorldState/GridManager");
+        var worldLogic = root.GetNode<WorldLogic>("WorldManager");
+        var gridManager = root.GetNode<GridManager>("WorldManager/GridManager");
         if (gridManager == null)
         {
             GD.PrintErr("[PAWN] GridManager not found!");
@@ -36,7 +37,7 @@ public partial class GridPawn : Node3D
         GetAbilities(worldLogic);
     }
 
-    private List<PawnAbility> GetAbilities(WorldLogic worldLogic)
+    public List<PawnAbility> GetAbilities(WorldLogic worldLogic)
     {
         if (_pawnAbilities.Count > 0)
             return _pawnAbilities;
@@ -54,5 +55,11 @@ public partial class GridPawn : Node3D
         }
 
         return _pawnAbilities;
+    }
+
+    public override string ToString()
+    {
+        var abilities = string.Join(", ", _pawnAbilities.Select(x => x.AbilityName));
+        return $"[PAWN] {Name}, Abilities: {abilities}";
     }
 }

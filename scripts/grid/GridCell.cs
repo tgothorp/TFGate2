@@ -19,4 +19,6 @@ public sealed class GridCell
     /// Coordinate position of the cell in the grid
     /// </summary>
     public Vector2I Coordinate { get; private set; }
+    
+    public override string ToString() => $"(X:{Coordinate.X}, Y:{Coordinate.Y})";
 }

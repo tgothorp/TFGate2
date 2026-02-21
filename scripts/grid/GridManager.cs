@@ -28,10 +28,18 @@ public partial class GridManager : Node3D
     private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
     private GridCell _selectedCell;
     private bool _canSelectGrid = false;
+    
+    private WorldLogic _worldLogic;
 
     public override void _Ready()
     {
         BuildGrid();
+
+        _worldLogic = GetParent<WorldLogic>();
+        if (_worldLogic == null)
+        {
+            GD.PrintErr("WorldLogic not found!");
+        }
     }
 
     private void BuildGrid()
@@ -49,6 +57,39 @@ public partial class GridManager : Node3D
             }
         }
     }
+
+    public void SelectCell(Vector2I coordinate)
+    {
+        if (!CanSelectGrid)
+            return;
+
+        _selectedCell = GetCell(coordinate);
+        GD.Print($"[GRID] Selected cell: {_selectedCell.Coordinate}");
+
+        _worldLogic.GridCellSelected(_selectedCell);
+    }
+
+    public GridCell AddPawn(GridPawn pawn)
+    {
+        var cell = WorldToGrid(pawn.GlobalPosition);
+        if (!cell.HasValue)
+        {
+            GD.Print("Pawn not added to grid: out of bounds");
+            return null;
+        }
+
+        GD.Print($"[GRID] Pawn added to grid: {pawn.Name} at {cell.Value}");
+        _occupiedPositions[pawn] = cell.Value;
+
+        if (pawn.ShouldSnapToCellCenter)
+        {
+            pawn.GlobalPosition = GridToWorld(cell.Value);
+        }
+        
+        return _grid[cell.Value.X, cell.Value.Y];
+    }
+    
+    #region Helpers
 
     /// <summary>
     /// Returns the position of a cell in world space
@@ -100,57 +141,6 @@ public partial class GridManager : Node3D
 
         return _grid[coordinate.X, coordinate.Y];
     }
-
-    /// <summary>
-    /// Sets the currently selected cell (if CanSelectGrid is true)
-    /// </summary>
-    public void SelectCell(Vector2I coordinate)
-    {
-        if (!CanSelectGrid)
-            return;
-
-        _selectedCell = GetCell(coordinate);
-        GD.Print($"[GRID] Selected cell: {_selectedCell.Coordinate}");
-    }
-
-    public GridCell AddPawn(GridPawn pawn)
-    {
-        var cell = WorldToGrid(pawn.GlobalPosition);
-        if (!cell.HasValue)
-        {
-            GD.Print("Pawn not added to grid: out of bounds");
-            return null;
-        }
-
-        GD.Print($"[GRID] Pawn added to grid: {pawn.Name} at {cell.Value}");
-        _occupiedPositions[pawn] = cell.Value;
-
-        if (pawn.ShouldSnapToCellCenter)
-        {
-            pawn.GlobalPosition = GridToWorld(cell.Value);
-        }
-        
-        return _grid[cell.Value.X, cell.Value.Y];
-    }
     
-    public GridCell AttemptMovePawn(GridPawn pawn, Vector2I newPosition)
-    {
-        if (pawn.OccupiedCell == null)
-        {
-            GD.PrintErr($"Attempted to move pawn {pawn.Name} but it is not on the grid!");
-            return null;
-        }
-
-        if (_occupiedPositions.Values.Contains(newPosition))
-        {
-            GD.PrintErr($"Attempted to move pawn {pawn.Name} to an occupied position!");
-            return null;
-        }
-
-        // Attempt A* path
-        
-        // If successful, move pawn
-        _occupiedPositions[pawn] = newPosition;
-        return _grid[newPosition.X, newPosition.Y];
-    }
+    #endregion
 }

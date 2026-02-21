@@ -14,9 +14,4 @@ public partial class MoveAbility : PawnAbility
         _remainingDistance = Distance;
         base._EnterTree();
     }
-
-    public override void ExecuteAbility()
-    {
-        
-    }
 }
