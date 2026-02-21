@@ -112,6 +112,15 @@ public partial class GridManager : Node3D
         return _grid[cell.Value.X, cell.Value.Y];
     }
 
+    public GridPath FindPath(GridCell startCell, GridCell endCell)
+    {
+        // TODO: Implement pathfinding
+        throw new System.NotImplementedException();
+    }
+
+    /// <summary>
+    /// TEMP: Just checks if move is valid based on distance and occupancy. Does not check pathfinding or anything. Returns true if move is valid.
+    /// </summary>
     public bool CanMovePawnToCell(GridPawn pawn, GridCell targetCell, int maxDistance)
     {
         if (pawn == null || targetCell == null || pawn.OccupiedCell == null || maxDistance <= 0)
@@ -131,6 +140,12 @@ public partial class GridManager : Node3D
         return true;
     }
 
+    /// <summary>
+    /// TEMP:  Just moves pawn, doesn't check pathfinding or anything. Returns true if move successful.
+    /// </summary>
+    /// <param name="pawn"></param>
+    /// <param name="targetCell"></param>
+    /// <returns></returns>
     public bool TryMovePawnToCell(GridPawn pawn, GridCell targetCell)
     {
         if (pawn == null || targetCell == null || pawn.OccupiedCell == null)
