@@ -19,6 +19,11 @@ public partial class GridInputController : Node3D
     
     public override void _UnhandledInput(InputEvent @event)
     {
+        if (@event is InputEventMouseMotion mouseMotion)
+        {
+            HandleHover(mouseMotion.Position);
+        }
+
         if (@event is InputEventMouseButton mouseButton)
         {
             if (mouseButton.ButtonIndex == MouseButton.Left && mouseButton.Pressed)
@@ -30,31 +35,55 @@ public partial class GridInputController : Node3D
     
     private void HandleClick(Vector2 mousePosition)
     {
+        if (!TryGetGridCoordAtMouse(mousePosition, out var gridCoord))
+            return;
+
+        _gridManager.SelectCell(gridCoord);
+    }
+
+    private void HandleHover(Vector2 mousePosition)
+    {
+        if (!_gridManager.CanSelectGrid)
+        {
+            _gridManager.SetHoveredCell(null);
+            return;
+        }
+
+        if (!TryGetGridCoordAtMouse(mousePosition, out var gridCoord))
+        {
+            _gridManager.SetHoveredCell(null);
+            return;
+        }
+
+        _gridManager.SetHoveredCell(gridCoord);
+    }
+
+    private bool TryGetGridCoordAtMouse(Vector2 mousePosition, out Vector2I gridCoord)
+    {
+        gridCoord = default;
+
         _camera = GetViewport().GetCamera3D();
         if (_camera == null)
-            return;
-        
-        // Create ray from camera through mouse position
+            return false;
+
         var from = _camera.ProjectRayOrigin(mousePosition);
         var to = from + _camera.ProjectRayNormal(mousePosition) * 1000f;
-        
-        // Perform raycast
+
         var spaceState = GetWorld3D().DirectSpaceState;
         var query = PhysicsRayQueryParameters3D.Create(from, to);
         query.CollideWithAreas = false;
         query.CollideWithBodies = true;
-        
+
         var result = spaceState.IntersectRay(query);
-        
-        if (result.Count > 0)
-        {
-            var hitPosition = (Vector3)result["position"];
-            var gridCoord = _gridManager.WorldToGrid(hitPosition);
-            
-            if (gridCoord.HasValue)
-            {
-                _gridManager.SelectCell(gridCoord.Value);
-            }
-        }
+        if (result.Count == 0)
+            return false;
+
+        var hitPosition = (Vector3)result["position"];
+        var maybeGridCoord = _gridManager.WorldToGrid(hitPosition);
+        if (!maybeGridCoord.HasValue)
+            return false;
+
+        gridCoord = maybeGridCoord.Value;
+        return true;
     }
 }

@@ -60,6 +60,17 @@ public partial class GridDebugRenderer : Node3D
             RebuildDeferred();
         }
     }
+    
+    [Export]
+    public Color HoverColor
+    {
+        get => _hoverColor;
+        set
+        {
+            _hoverColor = value;
+            RebuildDeferred();
+        }
+    }
 
     [Export]
     public float SelectionYOffset
@@ -79,15 +90,17 @@ public partial class GridDebugRenderer : Node3D
     private float _yOffset = 0.05f;
     private Color _lineColor = new(0, 248, 179, 1);
     private bool _showSelection = true;
-    private Color _selectionColor = new(1f, 1f, 0f, 0.8f);
+    private Color _selectionColor = new(0.2f, 1f, 0.2f, 0.85f);
+    private Color _hoverColor = new(0.2f, 1f, 0.2f, 0.45f);
     private float _selectionYOffset = 0.08f;
+    private const float HoverYOffset = 0.07f;
 
     private MultiMeshInstance3D _mmi;
     private MultiMesh _mm;
     private BoxMesh _box;
     private StandardMaterial3D _mat;
     private MeshInstance3D _selectionHighlight;
-    private GridInputController _inputController;
+    private MeshInstance3D _hoverHighlight;
     private GridManager _gridManager;
 
     public override void _EnterTree()
@@ -99,6 +112,7 @@ public partial class GridDebugRenderer : Node3D
 
     public override void _Process(double delta)
     {
+        UpdateHoverHighlight();
         UpdateSelectionHighlight();
     }
 
@@ -143,6 +157,26 @@ public partial class GridDebugRenderer : Node3D
             _selectionHighlight.Mesh = planeMesh;
             _selectionHighlight.MaterialOverride = selectionMat;
             _selectionHighlight.Visible = false;
+        }
+
+        // Create hover highlight
+        if (_hoverHighlight == null)
+        {
+            _hoverHighlight = new MeshInstance3D();
+            AddChild(_hoverHighlight);
+
+            var planeMesh = new PlaneMesh { Size = Vector2.One };
+            var hoverMat = new StandardMaterial3D
+            {
+                AlbedoColor = _hoverColor,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                NoDepthTest = true
+            };
+
+            _hoverHighlight.Mesh = planeMesh;
+            _hoverHighlight.MaterialOverride = hoverMat;
+            _hoverHighlight.Visible = false;
         }
     }
 
@@ -220,25 +254,12 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdateSelectionHighlight()
     {
-        if (!_showSelection || _selectionHighlight == null)
+        if (!_showSelection || _selectionHighlight == null || !_gridManager.CanSelectGrid)
         {
             if (_selectionHighlight != null)
                 _selectionHighlight.Visible = false;
             return;
         }
-
-        // Get the input controller if we don't have it yet
-        if (_inputController == null)
-        {
-            var grid = GetParent<GridManager>();
-            if (grid != null)
-            {
-                _inputController = grid.GetNodeOrNull<GridInputController>("GridInputController");
-            }
-        }
-
-        if (_inputController == null)
-            return;
 
         var selectedCell = _gridManager.SelectedCell;
         if (selectedCell != null)
@@ -262,5 +283,35 @@ public partial class GridDebugRenderer : Node3D
         {
             _selectionHighlight.Visible = false;
         }
+    }
+    
+    private void UpdateHoverHighlight()
+    {
+        if (!_showSelection || _hoverHighlight == null || !_gridManager.CanSelectGrid)
+        {
+            if (_hoverHighlight != null)
+                _hoverHighlight.Visible = false;
+            return;
+        }
+
+        var hoveredCell = _gridManager.HoveredCell;
+        if (hoveredCell == null)
+        {
+            _hoverHighlight.Visible = false;
+            return;
+        }
+
+        var grid = GetParent<GridManager>();
+        var localPos = grid.GridToLocal(hoveredCell.Coordinate);
+
+        var planeMesh = (PlaneMesh)_hoverHighlight.Mesh;
+        planeMesh.Size = new Vector2(grid.CellSize, grid.CellSize);
+
+        _hoverHighlight.Position = new Vector3(localPos.X, HoverYOffset, localPos.Z);
+
+        var mat = (StandardMaterial3D)_hoverHighlight.MaterialOverride;
+        mat.AlbedoColor = _hoverColor;
+
+        _hoverHighlight.Visible = true;
     }
 }

@@ -19,14 +19,23 @@ public partial class GridManager : Node3D
     public bool CanSelectGrid
     {
         get => _canSelectGrid;
-        set => _canSelectGrid = value;
+        set
+        {
+            _canSelectGrid = value;
+            if (!_canSelectGrid)
+            {
+                _hoveredCell = null;
+            }
+        }
     }
 
     public GridCell SelectedCell => _selectedCell;
+    public GridCell HoveredCell => _hoveredCell;
 
     private GridCell[,] _grid;
     private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
     private GridCell _selectedCell;
+    private GridCell _hoveredCell;
     private bool _canSelectGrid = false;
     
     private WorldLogic _worldLogic;
@@ -67,6 +76,17 @@ public partial class GridManager : Node3D
         GD.Print($"[GRID] Selected cell: {_selectedCell.Coordinate}");
 
         _worldLogic.GridCellSelected(_selectedCell);
+    }
+
+    public void SetHoveredCell(Vector2I? coordinate)
+    {
+        if (!CanSelectGrid)
+        {
+            _hoveredCell = null;
+            return;
+        }
+
+        _hoveredCell = coordinate.HasValue ? GetCell(coordinate.Value) : null;
     }
 
     public GridCell AddPawn(GridPawn pawn)
