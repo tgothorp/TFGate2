@@ -27,4 +27,6 @@ public readonly struct GridPath
     }
 
     public static GridPath Invalid => new GridPath(false, Vector2I.Zero, Vector2I.Zero, [], 0);
+    
+    public override string ToString() => $"PathIsValid: {PathIsValid}, Start: {Start}, End: {End}, Cost: {Cost}";
 }

@@ -78,8 +78,6 @@ public partial class GridManager : Node3D
             return;
 
         _selectedCell = GetCell(coordinate);
-        GD.Print($"[GRID] Selected cell: {_selectedCell.Coordinate}");
-
         _worldLogic.GridCellSelected(_selectedCell);
     }
 
@@ -127,35 +125,6 @@ public partial class GridManager : Node3D
 
         _selectedPath = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
         return _selectedPath;
-    }
-
-    /// <summary>
-    /// TEMP:  Just moves pawn, doesn't check pathfinding or anything. Returns true if move successful.
-    /// </summary>
-    /// <param name="pawn"></param>
-    /// <param name="targetCell"></param>
-    /// <returns></returns>
-    public bool TryMovePawnToCell(GridPawn pawn, GridCell targetCell)
-    {
-        if (pawn == null || targetCell == null || pawn.OccupiedCell == null)
-            return false;
-
-        var targetCoordinate = targetCell.Coordinate;
-        if (_occupiedPositions.Values.Contains(targetCoordinate))
-            return false;
-
-        if (!_occupiedPositions.ContainsKey(pawn))
-            return false;
-
-        _occupiedPositions[pawn] = targetCoordinate;
-        pawn.SetOccupiedCell(targetCell);
-
-        if (pawn.ShouldSnapToCellCenter)
-        {
-            pawn.GlobalPosition = GridToWorld(targetCoordinate);
-        }
-
-        return true;
     }
     
     #region Helpers

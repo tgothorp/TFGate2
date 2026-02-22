@@ -16,6 +16,8 @@ public partial class PawnDebugRenderer : Node3D
     public Color HighlightColor { get; set; } = new(0.2f, 1.0f, 0.2f, 0.35f);
 
     private StandardMaterial3D _highlightMaterial;
+    private StandardMaterial3D _redTeamMaterial;
+    private StandardMaterial3D _blueTeamMaterial;
 
     public override void _Ready()
     {
@@ -33,6 +35,24 @@ public partial class PawnDebugRenderer : Node3D
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
             NoDepthTest = true
         };
+        
+        _redTeamMaterial = new StandardMaterial3D
+        {
+            AlbedoColor = new Color(1.0f, 0.2f, 0.2f),
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            NoDepthTest = true
+        };
+        
+        _blueTeamMaterial = new StandardMaterial3D
+        {
+            AlbedoColor = new Color(0.2f, 0.2f, 1.0f),
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            NoDepthTest = true
+        };
+        
+        ApplyTeamColors();
     }
 
     public override void _Process(double delta)
@@ -40,13 +60,13 @@ public partial class PawnDebugRenderer : Node3D
         if (_pawnManager == null)
             return;
 
+        ApplyTeamColors();
+        
         var selectedPawn = _pawnManager.SelectedPawn;
-
         if (selectedPawn == _highlightedPawn)
             return;
 
         ClearCurrentHighlight();
-
         if (selectedPawn != null)
         {
             ApplyHighlight(selectedPawn);
@@ -72,6 +92,27 @@ public partial class PawnDebugRenderer : Node3D
         _highlightedMesh = mesh;
         _previousOverlay = mesh.MaterialOverlay;
         mesh.MaterialOverlay = _highlightMaterial;
+    }
+
+    private void ApplyTeamColors()
+    {
+        var pawns = _pawnManager.RegisteredPawns.Values;
+        foreach (var pawn in pawns)
+        {
+            if (pawn == _highlightedPawn)
+                continue;
+            
+            var mesh = pawn.GetNodeOrNull<MeshInstance3D>("StaticBody3D/MeshInstance3D");
+            if (mesh == null)
+                continue;
+
+            mesh.MaterialOverlay = pawn.Team switch
+            {
+                WorldLogic.Team.Red => _redTeamMaterial,
+                WorldLogic.Team.Blue => _blueTeamMaterial,
+                _ => mesh.MaterialOverlay
+            };
+        }
     }
 
     private void ClearCurrentHighlight()

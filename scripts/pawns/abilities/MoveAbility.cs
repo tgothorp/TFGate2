@@ -6,16 +6,7 @@ namespace TFGate2.scripts.pawns.abilities;
 
 public partial class MoveAbility : PawnAbility
 {
-    [Export]
-    public int Distance { get; set; } = 7;
-
-    private int _remainingDistance;
-
-    public override void _EnterTree()
-    {
-        _remainingDistance = Distance;
-        base._EnterTree();
-    }
+    private GridPath _path;
 
     public override bool CanExecute(AbilityExecutionContext context)
     {
@@ -25,20 +16,20 @@ public partial class MoveAbility : PawnAbility
             return false;
         }
 
-        if (context.SourcePawn.OccupiedCell == null || _remainingDistance <= 0)
+        if (context.SourcePawn.OccupiedCell == null || context.SourcePawn.MoveBudget <= 0)
         {
             GD.PrintErr("Pawn cannot move!");
             return false;
         }
 
-        var path = context.GridManager.FindPath(context.SourcePawn.OccupiedCell, context.TargetCell);
-        if (!path.PathIsValid)
+        _path = context.GridManager.FindPath(context.SourcePawn.OccupiedCell, context.TargetCell);
+        if (!_path.PathIsValid)
         {
             GD.PrintErr("No path found!");
             return false;
         }
 
-        if (path.Cost > _remainingDistance)
+        if (_path.Cost > context.SourcePawn.MoveBudget)
         {
             GD.PrintErr("Path is too expensive!");
             return false;
@@ -49,6 +40,14 @@ public partial class MoveAbility : PawnAbility
 
     public override void Execute(AbilityExecutionContext context)
     {
+        if (!_path.PathIsValid || _path.Cost > context.SourcePawn.MoveBudget || context.SourcePawn.MoveBudget <= 0)
+        {
+            GD.PushWarning($"Pawn move state is not valid ({_path})");
+        }
+        
+        GD.Print($"[ABILITY] Move executed by {context.SourcePawn.Name}. Path: {_path}");
+        context.SourcePawn.SetMoveBudget(context.SourcePawn.MoveBudget - _path.Cost);
+
         // if (!CanExecute(context))
         //     return;
         //

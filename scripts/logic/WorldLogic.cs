@@ -9,7 +9,10 @@ using TFGate2.scripts.pawns.abilities;
 public partial class WorldLogic : Node3D
 {
     [Export]
-    public Team CurrentTeamTurn { get; set; } = Team.World;
+    public Team PlayerTeam { get; set; } = Team.Red;
+    
+    [Export]
+    public Team CurrentTeamTurn { get; set; } = Team.Red;
     
     [Export]
     public SelectionState CurrentSelectionState { get; set; } = SelectionState.AllPawns;

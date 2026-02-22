@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 using TFGate2.scripts.grid;
 using TFGate2.scripts.pawns.abilities;
@@ -11,20 +12,22 @@ public partial class PawnManager : Node3D
 {
     public bool IsResolvingAbility { get; private set; }
     public GridPawn SelectedPawn => _selectedPawn;
+    public Dictionary<Guid, GridPawn> RegisteredPawns => _registeredPawns;
 
     private GridPawn _selectedPawn;
     private PawnAbility _selectedAbility;
-    
-    private PawnAbilityUiController _abilityUiController;
+
+    private PawnUiController _uiController;
     private WorldLogic _worldLogic;
     private GridManager _gridManager;
+    private Dictionary<Guid, GridPawn> _registeredPawns = new();
 
     public override void _Ready()
     {
-        _abilityUiController = GetNode<PawnAbilityUiController>("PawnAbilityManager");
-        if (_abilityUiController == null)
+        _uiController = GetNode<PawnUiController>("PawnUiManager");
+        if (_uiController == null)
         {
-            GD.PrintErr("PawnAbilityManager not found!");
+            GD.PrintErr("PawnUiManager not found!");
         }
 
         _worldLogic = GetParent<WorldLogic>();
@@ -56,10 +59,20 @@ public partial class PawnManager : Node3D
         base._UnhandledInput(@event);
     }
 
+    public Guid RegisterPawn(GridPawn pawn)
+    {
+        var pawnId = Guid.NewGuid();
+        _registeredPawns.Add(pawnId, pawn);
+
+        return pawnId;
+    }
+
     public void SelectPawn(GridPawn pawn)
     {
         if (!CanSelectPawns())
             return;
+
+        _uiController.UpdatePawnData();
         
         if (IsResolvingAbility)
         {
@@ -67,10 +80,8 @@ public partial class PawnManager : Node3D
             ResolveAbility(pawn, null);
             return;
         }
-        
-        _selectedPawn = pawn;
-        _abilityUiController.DisplayAbilitiesForPawn(pawn);
 
+        _selectedPawn = pawn;
         GD.Print($"Selected GridPawn: {pawn}");
     }
 
@@ -104,6 +115,8 @@ public partial class PawnManager : Node3D
         }
 
         _selectedAbility.Execute(context);
+        _uiController.UpdatePawnData();
+
         DeselectAbility();
     }
 
@@ -124,14 +137,14 @@ public partial class PawnManager : Node3D
         _selectedAbility = null;
         _worldLogic.UpdateSelectionState(WorldLogic.SelectionState.AllPawns);
     }
-    
+
     private void DeselectPawn()
     {
         GD.Print("Deselecting pawn");
         IsResolvingAbility = false;
         _selectedPawn = null;
         _selectedAbility = null;
-        _abilityUiController.DisplayAbilitiesForPawn(null);
+        _uiController.UpdatePawnData();
         _worldLogic.UpdateSelectionState(WorldLogic.SelectionState.AllPawns);
     }
 }

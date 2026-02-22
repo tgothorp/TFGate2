@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://djvtr23gt73u0" path="res://scripts/pawns/managers/PawnManager.cs" id="1_wo6f7"]
 [ext_resource type="Script" uid="uid://bh14wi8f1wlb4" path="res://scripts/pawns/managers/PawnInputController.cs" id="2_3deoo"]
-[ext_resource type="Script" uid="uid://btjyugubxgb01" path="res://scripts/pawns/managers/PawnAbilityUiController.cs" id="3_6vaap"]
 [ext_resource type="Script" uid="uid://blwue1hrmw4gy" path="res://scripts/pawns/managers/PawnDebugRenderer.cs" id="3_fecds"]
+[ext_resource type="Script" uid="uid://btjyugubxgb01" path="res://scripts/pawns/managers/PawnUiController.cs" id="4_fecds"]
 
 [node name="PawnManager" type="Node3D" unique_id=1035608980]
 script = ExtResource("1_wo6f7")
@@ -14,14 +14,25 @@ script = ExtResource("2_3deoo")
 [node name="PawnDebugRender" type="Node3D" parent="." unique_id=493610444]
 script = ExtResource("3_fecds")
 
-[node name="PawnAbilityManager" type="Control" parent="." unique_id=1813439131]
+[node name="PawnUiManager" type="Control" parent="." unique_id=1813439131]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
-script = ExtResource("3_6vaap")
+script = ExtResource("4_fecds")
 
-[node name="AbilitiesContainer" type="VBoxContainer" parent="PawnAbilityManager" unique_id=1362368075]
+[node name="AbilitiesContainer" type="VBoxContainer" parent="PawnUiManager" unique_id=1362368075]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 256.0
+offset_bottom = 1080.0
+
+[node name="DataContainer" type="VBoxContainer" parent="PawnUiManager" unique_id=1189487239]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 46.4
+anchor_right = 48.000004
+offset_left = -192.0
+offset_right = -0.00012207031
+offset_bottom = 1080.0
+grow_horizontal = 0
+metadata/_edit_use_anchors_ = true

@@ -115,5 +115,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 32.83
 
 [node name="PlayerPawns" type="Node3D" parent="." unique_id=844967900]
 
-[node name="MoveablePawn" parent="PlayerPawns" unique_id=665968329 instance=ExtResource("6_qm7gn")]
+[node name="MoveablePawn_Red" parent="PlayerPawns" unique_id=665968329 instance=ExtResource("6_qm7gn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, 15)
+MoveBudget = 7
+
+[node name="MoveablePawn_Blu" parent="PlayerPawns" unique_id=1427291965 instance=ExtResource("6_qm7gn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 33)
+Team = 1
