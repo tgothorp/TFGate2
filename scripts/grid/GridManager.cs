@@ -34,11 +34,13 @@ public partial class GridManager : Node3D
 
     public GridCell SelectedCell => _selectedCell;
     public GridCell HoveredCell => _hoveredCell;
+    public GridPath SelectedPath => _selectedPath;
 
     private GridCell[,] _grid;
     private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
     private GridCell _selectedCell;
     private GridCell _hoveredCell;
+    private GridPath _selectedPath;
     private bool _canSelectGrid = false;
     
     private WorldLogic _worldLogic;
@@ -114,30 +116,17 @@ public partial class GridManager : Node3D
 
     public GridPath FindPath(GridCell startCell, GridCell endCell)
     {
-        // TODO: Implement pathfinding
-        throw new System.NotImplementedException();
-    }
+        if (startCell == null || endCell == null)
+            return GridPath.Invalid;
 
-    /// <summary>
-    /// TEMP: Just checks if move is valid based on distance and occupancy. Does not check pathfinding or anything. Returns true if move is valid.
-    /// </summary>
-    public bool CanMovePawnToCell(GridPawn pawn, GridCell targetCell, int maxDistance)
-    {
-        if (pawn == null || targetCell == null || pawn.OccupiedCell == null || maxDistance <= 0)
-            return false;
+        if (startCell.Coordinate == endCell.Coordinate)
+            return new GridPath(true, startCell.Coordinate, endCell.Coordinate, [], 0);
 
-        var currentCoordinate = pawn.OccupiedCell.Coordinate;
-        var targetCoordinate = targetCell.Coordinate;
-        var movementCost = Mathf.Abs(currentCoordinate.X - targetCoordinate.X) +
-                           Mathf.Abs(currentCoordinate.Y - targetCoordinate.Y);
+        if (IsCellOccupied(endCell.Coordinate))
+            return new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], 0);
 
-        if (movementCost == 0 || movementCost > maxDistance)
-            return false;
-
-        if (_occupiedPositions.Values.Contains(targetCoordinate))
-            return false;
-
-        return true;
+        _selectedPath = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
+        return _selectedPath;
     }
 
     /// <summary>
@@ -216,10 +205,20 @@ public partial class GridManager : Node3D
     /// </summary>
     public GridCell GetCell(Vector2I coordinate)
     {
-        if (coordinate.X < 0 || coordinate.X >= Width || coordinate.Y < 0 || coordinate.Y >= Height)
+        if (!IsWithinBounds(coordinate))
             return null;
 
         return _grid[coordinate.X, coordinate.Y];
+    }
+
+    public bool IsWithinBounds(Vector2I coordinate)
+    {
+        return coordinate.X >= 0 && coordinate.X < Width && coordinate.Y >= 0 && coordinate.Y < Height;
+    }
+
+    public bool IsCellOccupied(Vector2I coordinate)
+    {
+        return _occupiedPositions.Values.Contains(coordinate);
     }
     
     #endregion

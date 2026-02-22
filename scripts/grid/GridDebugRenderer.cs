@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 namespace TFGate2.scripts.grid;
 
@@ -82,6 +83,24 @@ public partial class GridDebugRenderer : Node3D
             RebuildDeferred();
         }
     }
+    
+    [Export]
+    public Color PathColor
+    {
+        get => _pathColor;
+        set
+        {
+            _pathColor = value;
+            UpdatePathMaterials();
+        }
+    }
+
+    [Export]
+    public float PathYOffset
+    {
+        get => _pathYOffset;
+        set => _pathYOffset = value;
+    }
 
     [ExportToolButton("Redraw Grid")]
     public Callable RedrawGrid => Callable.From(RebuildDeferred);
@@ -92,7 +111,9 @@ public partial class GridDebugRenderer : Node3D
     private bool _showSelection = true;
     private Color _selectionColor = new(0.2f, 1f, 0.2f, 0.85f);
     private Color _hoverColor = new(0.2f, 1f, 0.2f, 0.45f);
+    private Color _pathColor = new(0.2f, 0.7f, 1f, 0.35f);
     private float _selectionYOffset = 0.08f;
+    private float _pathYOffset = 0.06f;
     private const float HoverYOffset = 0.07f;
 
     private MultiMeshInstance3D _mmi;
@@ -101,6 +122,7 @@ public partial class GridDebugRenderer : Node3D
     private StandardMaterial3D _mat;
     private MeshInstance3D _selectionHighlight;
     private MeshInstance3D _hoverHighlight;
+    private readonly List<MeshInstance3D> _pathHighlights = [];
     private GridManager _gridManager;
 
     public override void _EnterTree()
@@ -114,6 +136,41 @@ public partial class GridDebugRenderer : Node3D
     {
         UpdateHoverHighlight();
         UpdateSelectionHighlight();
+        UpdatePathHighlight();
+    }
+
+    private void UpdatePathHighlight()
+    {
+        if (_gridManager == null)
+            return;
+
+        var path = _gridManager.SelectedPath;
+        if (!path.PathIsValid || path.Path.Length == 0)
+        {
+            HideAllPathHighlights();
+            return;
+        }
+
+        EnsurePathHighlights(path.Path.Length);
+
+        var grid = GetParent<GridManager>();
+        for (var i = 0; i < path.Path.Length; i++)
+        {
+            var cellCoordinate = path.Path[i];
+            var localPos = grid.GridToLocal(cellCoordinate);
+            var highlight = _pathHighlights[i];
+
+            var planeMesh = (PlaneMesh)highlight.Mesh;
+            planeMesh.Size = new Vector2(grid.CellSize, grid.CellSize);
+
+            highlight.Position = new Vector3(localPos.X, _pathYOffset, localPos.Z);
+            highlight.Visible = true;
+        }
+
+        for (var i = path.Path.Length; i < _pathHighlights.Count; i++)
+        {
+            _pathHighlights[i].Visible = false;
+        }
     }
 
     private void EnsureNodes()
@@ -313,5 +370,47 @@ public partial class GridDebugRenderer : Node3D
         mat.AlbedoColor = _hoverColor;
 
         _hoverHighlight.Visible = true;
+    }
+
+    private void EnsurePathHighlights(int requiredCount)
+    {
+        while (_pathHighlights.Count < requiredCount)
+        {
+            var pathHighlight = new MeshInstance3D();
+            var planeMesh = new PlaneMesh { Size = Vector2.One };
+            var pathMat = new StandardMaterial3D
+            {
+                AlbedoColor = _pathColor,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                NoDepthTest = true
+            };
+
+            pathHighlight.Mesh = planeMesh;
+            pathHighlight.MaterialOverride = pathMat;
+            pathHighlight.Visible = false;
+            AddChild(pathHighlight);
+
+            _pathHighlights.Add(pathHighlight);
+        }
+    }
+
+    private void HideAllPathHighlights()
+    {
+        for (var i = 0; i < _pathHighlights.Count; i++)
+        {
+            _pathHighlights[i].Visible = false;
+        }
+    }
+
+    private void UpdatePathMaterials()
+    {
+        for (var i = 0; i < _pathHighlights.Count; i++)
+        {
+            if (_pathHighlights[i].MaterialOverride is StandardMaterial3D mat)
+            {
+                mat.AlbedoColor = _pathColor;
+            }
+        }
     }
 }
