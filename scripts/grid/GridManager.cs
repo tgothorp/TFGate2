@@ -18,30 +18,16 @@ public partial class GridManager : Node3D
     [Export]
     public int Height { get; set; } = 20;
 
-    [Export]
-    public bool CanSelectGrid
-    {
-        get => _canSelectGrid;
-        set
-        {
-            _canSelectGrid = value;
-            if (!_canSelectGrid)
-            {
-                _hoveredCell = null;
-            }
-        }
-    }
+    public bool CanSelectGrid => _worldLogic != null && _worldLogic.CanSelectGrid;
 
     public GridCell SelectedCell => _selectedCell;
     public GridCell HoveredCell => _hoveredCell;
-    public GridPath SelectedPath => _selectedPath;
+    public GridPath SelectedPath => _worldLogic?.TargetingContext?.PreviewPath ?? GridPath.Invalid;
 
     private GridCell[,] _grid;
     private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
     private GridCell _selectedCell;
     private GridCell _hoveredCell;
-    private GridPath _selectedPath;
-    private bool _canSelectGrid = false;
     
     private WorldLogic _worldLogic;
 
@@ -78,6 +64,7 @@ public partial class GridManager : Node3D
             return;
 
         _selectedCell = GetCell(coordinate);
+        _worldLogic.TargetingContext.SelectedCell = _selectedCell;
         _worldLogic.GridCellSelected(_selectedCell);
     }
 
@@ -86,10 +73,28 @@ public partial class GridManager : Node3D
         if (!CanSelectGrid)
         {
             _hoveredCell = null;
+            if (_worldLogic?.TargetingContext != null)
+            {
+                _worldLogic.TargetingContext.HoveredCell = null;
+                _worldLogic.TargetingContext.PreviewPath = GridPath.Invalid;
+            }
             return;
         }
 
         _hoveredCell = coordinate.HasValue ? GetCell(coordinate.Value) : null;
+
+        if (_worldLogic?.TargetingContext == null)
+            return;
+
+        _worldLogic.TargetingContext.HoveredCell = _hoveredCell;
+
+        if (_worldLogic.TargetingContext is { IsActive: true, SourcePawn: not null } && _hoveredCell != null)
+        {
+            _worldLogic.TargetingContext.PreviewPath = FindPath(_worldLogic.TargetingContext.SourcePawn.OccupiedCell, _hoveredCell);
+            return;
+        }
+
+        _worldLogic.TargetingContext.PreviewPath = GridPath.Invalid;
     }
 
     public GridCell AddPawn(GridPawn pawn)
@@ -123,8 +128,7 @@ public partial class GridManager : Node3D
         if (IsCellOccupied(endCell.Coordinate))
             return new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], 0);
 
-        _selectedPath = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
-        return _selectedPath;
+        return GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
     }
     
     #region Helpers

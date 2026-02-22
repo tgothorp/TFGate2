@@ -124,8 +124,9 @@ public partial class GridDebugRenderer : Node3D
     private MeshInstance3D _hoverHighlight;
     private readonly List<MeshInstance3D> _pathHighlights = [];
     private GridManager _gridManager;
+    private WorldLogic _worldLogic;
 
-    public override void _EnterTree()
+    public override void _Ready()
     {
         EnsureNodes();
         ApplyVisibility();
@@ -141,10 +142,10 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdatePathHighlight()
     {
-        if (_gridManager == null)
+        if (_gridManager == null || _worldLogic?.TargetingContext == null)
             return;
 
-        var path = _gridManager.SelectedPath;
+        var path = _worldLogic.TargetingContext.PreviewPath;
         if (!path.PathIsValid || path.Path.Length == 0)
         {
             HideAllPathHighlights();
@@ -176,6 +177,7 @@ public partial class GridDebugRenderer : Node3D
     private void EnsureNodes()
     {
         _gridManager ??= GetParent<GridManager>();
+        _worldLogic ??= _gridManager?.GetParent<WorldLogic>();
         _mmi ??= new MultiMeshInstance3D();
         
         if (_mmi.GetParent() == null) AddChild(_mmi);
@@ -311,14 +313,14 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdateSelectionHighlight()
     {
-        if (!_showSelection || _selectionHighlight == null || !_gridManager.CanSelectGrid)
+        if (!_showSelection || _selectionHighlight == null || _worldLogic?.TargetingContext == null || !_worldLogic.CanSelectGrid)
         {
             if (_selectionHighlight != null)
                 _selectionHighlight.Visible = false;
             return;
         }
 
-        var selectedCell = _gridManager.SelectedCell;
+        var selectedCell = _worldLogic.TargetingContext.SelectedCell;
         if (selectedCell != null)
         {
             var grid = GetParent<GridManager>();
@@ -344,14 +346,14 @@ public partial class GridDebugRenderer : Node3D
     
     private void UpdateHoverHighlight()
     {
-        if (!_showSelection || _hoverHighlight == null || !_gridManager.CanSelectGrid)
+        if (!_showSelection || _hoverHighlight == null || _worldLogic?.TargetingContext == null || !_worldLogic.CanSelectGrid)
         {
             if (_hoverHighlight != null)
                 _hoverHighlight.Visible = false;
             return;
         }
 
-        var hoveredCell = _gridManager.HoveredCell;
+        var hoveredCell = _worldLogic.TargetingContext.HoveredCell;
         if (hoveredCell == null)
         {
             _hoverHighlight.Visible = false;

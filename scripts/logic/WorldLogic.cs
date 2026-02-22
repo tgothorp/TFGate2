@@ -1,6 +1,6 @@
 using Godot;
-using System;
 using TFGate2.scripts.grid;
+using TFGate2.scripts.logic;
 using TFGate2.scripts.pawns.abilities;
 
 /// <summary>
@@ -14,11 +14,27 @@ public partial class WorldLogic : Node3D
     [Export]
     public Team CurrentTeamTurn { get; set; } = Team.Red;
     
-    [Export]
-    public SelectionState CurrentSelectionState { get; set; } = SelectionState.AllPawns;
+    public SelectionState CurrentSelectionState => TargetingContext?.SelectionState ?? SelectionState.AllPawns;
+
+    public bool CanSelectGrid => CurrentSelectionState == SelectionState.Grid;
+    public bool CanSelectPawns => CurrentSelectionState is SelectionState.EnemyPawns or SelectionState.TeamPawns or SelectionState.AllPawns;
+
+    public TargetingContext TargetingContext { get; set; } = null;
 
     private GridManager _gridManager;
     private PawnManager _pawnManager;
+
+    public override void _EnterTree()
+    {
+        TargetingContext = new TargetingContext
+        {
+            IsActive = false,
+            SelectionState = SelectionState.AllPawns,
+            PreviewPath = GridPath.Invalid
+        };
+
+        base._EnterTree();
+    }
 
     public override void _Ready()
     {
@@ -39,43 +55,38 @@ public partial class WorldLogic : Node3D
         _gridManager = gridManager;
         _pawnManager = pawnManager;
         
-        UpdateSelectionState(SelectionState.AllPawns);
+        ClearTargetingContext();
     }
 
     public void UpdateSelectionState(SelectionState newState)
     {
-        CurrentSelectionState = newState;
-        switch (CurrentSelectionState)
-        {
-            case SelectionState.Nothing:
-                _gridManager.CanSelectGrid = false;
-                break;
-            case SelectionState.EnemyPawns:
-                _gridManager.CanSelectGrid = false;
-                break;
-            case SelectionState.TeamPawns:
-                _gridManager.CanSelectGrid = false;
-                break;
-            case SelectionState.AllPawns:
-                _gridManager.CanSelectGrid = false;
-                break;
-            case SelectionState.Grid:
-                _gridManager.CanSelectGrid = true;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        TargetingContext ??= new TargetingContext();
+        TargetingContext.SelectionState = newState;
     }
 
-    public void UpdateSelectionState(PawnAbility ability)
+    public void UpdateTargetingContext(PawnAbility ability)
     {
+        TargetingContext ??= new TargetingContext();
+
         UpdateSelectionState(ability.Target);
+
+        TargetingContext.IsActive = true;
+        TargetingContext.PawnAbility = ability;
+        TargetingContext.SourcePawn = ability.Pawn;
+        TargetingContext.HoveredCell = null;
+        TargetingContext.SelectedCell = null;
+        TargetingContext.PreviewPath = GridPath.Invalid;
     }
 
-    
+    public void ClearTargetingContext()
+    {
+        TargetingContext ??= new TargetingContext();
+        TargetingContext.Clear();
+    }
+
     public void GridCellSelected(GridCell cell)
     {
-        if (_pawnManager.IsResolvingAbility)
+        if (TargetingContext is { IsActive: true } && _pawnManager != null)
             _pawnManager.ResolveAbility(null, cell);
     }
     

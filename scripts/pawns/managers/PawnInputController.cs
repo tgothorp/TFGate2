@@ -1,9 +1,9 @@
 using Godot;
-using System;
 
 public partial class PawnInputController : Node3D
 {
     private PawnManager _pawnManager;
+    private WorldLogic _worldLogic;
 
     public override void _Ready()
     {
@@ -12,6 +12,12 @@ public partial class PawnInputController : Node3D
         if (_pawnManager == null)
         {
             GD.PrintErr("PawnManager not found!");
+        }
+
+        _worldLogic = GetParent<PawnManager>()?.GetParent<WorldLogic>();
+        if (_worldLogic == null)
+        {
+            GD.PrintErr("WorldLogic not found!");
         }
     }
     
@@ -28,6 +34,9 @@ public partial class PawnInputController : Node3D
 
     private void HandleClick(Vector2 mousePosition)
     {
+        if (_worldLogic == null || !_worldLogic.CanSelectPawns)
+            return;
+
         var camera = GetViewport().GetCamera3D();
         if (camera == null)
         {

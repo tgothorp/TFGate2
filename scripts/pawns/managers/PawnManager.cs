@@ -10,7 +10,7 @@ using TFGate2.scripts.pawns.managers;
 /// </summary>
 public partial class PawnManager : Node3D
 {
-    public bool IsResolvingAbility { get; private set; }
+    public bool IsResolvingAbility => _worldLogic?.TargetingContext?.IsActive ?? false;
     public GridPawn SelectedPawn => _selectedPawn;
     public Dictionary<Guid, GridPawn> RegisteredPawns => _registeredPawns;
 
@@ -88,9 +88,7 @@ public partial class PawnManager : Node3D
     public void SelectAbility(PawnAbility ability)
     {
         _selectedAbility = ability;
-        _worldLogic.UpdateSelectionState(_selectedAbility);
-
-        IsResolvingAbility = true;
+        _worldLogic.UpdateTargetingContext(_selectedAbility);
     }
 
     public void ResolveAbility(GridPawn pawn, GridCell targetCell)
@@ -122,29 +120,22 @@ public partial class PawnManager : Node3D
 
     private bool CanSelectPawns()
     {
-        return _worldLogic.CurrentSelectionState switch
-        {
-            WorldLogic.SelectionState.Grid or WorldLogic.SelectionState.Nothing => false,
-            WorldLogic.SelectionState.EnemyPawns or WorldLogic.SelectionState.TeamPawns or WorldLogic.SelectionState.AllPawns => true,
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        return _worldLogic is { CanSelectPawns: true };
     }
 
     private void DeselectAbility()
     {
         GD.Print("Deselecting ability");
-        IsResolvingAbility = false;
         _selectedAbility = null;
-        _worldLogic.UpdateSelectionState(WorldLogic.SelectionState.AllPawns);
+        _worldLogic.ClearTargetingContext();
     }
 
     private void DeselectPawn()
     {
         GD.Print("Deselecting pawn");
-        IsResolvingAbility = false;
         _selectedPawn = null;
         _selectedAbility = null;
         _uiController.UpdatePawnData();
-        _worldLogic.UpdateSelectionState(WorldLogic.SelectionState.AllPawns);
+        _worldLogic.ClearTargetingContext();
     }
 }

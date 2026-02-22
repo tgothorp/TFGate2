@@ -20,6 +20,8 @@ public abstract partial class PawnAbility : Node3D
     [Export(hintString:"Can this ability ONLY target the owner?")]
     public bool CanOnlyTargetSelf { get; set; }
 
+    public GridPawn Pawn => _owner;
+    
     private WorldLogic _worldLogic;
     private GridPawn _owner;
     

@@ -1,6 +1,5 @@
 using Godot;
 using TFGate2.scripts.grid;
-using System;
 
 namespace TFGate2.scripts.pawns.abilities;
 
@@ -22,7 +21,7 @@ public partial class MoveAbility : PawnAbility
             return false;
         }
 
-        _path = context.GridManager.FindPath(context.SourcePawn.OccupiedCell, context.TargetCell);
+        _path = ResolvePath(context);
         if (!_path.PathIsValid)
         {
             GD.PrintErr("No path found!");
@@ -61,5 +60,21 @@ public partial class MoveAbility : PawnAbility
         //
         // _remainingDistance = Math.Max(0, _remainingDistance - movementCost);
         // GD.Print($"[ABILITY] Move executed by {context.SourcePawn.Name}. Remaining distance: {_remainingDistance}");
+    }
+
+    private static GridPath ResolvePath(AbilityExecutionContext context)
+    {
+        var targetingContext = context.WorldLogic.TargetingContext;
+        if (targetingContext != null && targetingContext.PreviewPath.PathIsValid)
+        {
+            var previewPath = targetingContext.PreviewPath;
+            var sourceCoordinate = context.SourcePawn.OccupiedCell.Coordinate;
+            var targetCoordinate = context.TargetCell.Coordinate;
+
+            if (previewPath.Start == sourceCoordinate && previewPath.End == targetCoordinate)
+                return previewPath;
+        }
+
+        return context.GridManager.FindPath(context.SourcePawn.OccupiedCell, context.TargetCell);
     }
 }
