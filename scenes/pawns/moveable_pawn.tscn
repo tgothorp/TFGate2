@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bxog3far5m862" path="res://scripts/pawns/PlayerPawn.cs" id="1_lwuor"]
 [ext_resource type="PackedScene" uid="uid://csf5ibsdpxp2v" path="res://scenes/pawns/abilities/ability_move_basic.tscn" id="2_qkjys"]
+[ext_resource type="PackedScene" uid="uid://dgi8dj8vycr4h" path="res://scenes/pawns/abilities/ability_shoot_hitscan.tscn" id="3_qkjys"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_lwuor"]
 
@@ -19,6 +20,8 @@ CanTakeReaction = true
 [node name="Abilities" type="Node3D" parent="." unique_id=1564304230]
 
 [node name="AbilityMoveBasic" parent="Abilities" unique_id=1470256256 instance=ExtResource("2_qkjys")]
+
+[node name="AbilityShootHitscan" parent="Abilities" unique_id=940195924 instance=ExtResource("3_qkjys")]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=395869465]
 

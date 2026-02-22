@@ -96,7 +96,23 @@ public partial class PawnManager : Node3D
         if (_selectedAbility == null || _selectedPawn == null || _worldLogic == null || _gridManager == null)
             return;
 
-        GD.Print($"Resolving ability '{_selectedAbility.AbilityName}' for {_selectedPawn.Name}, (pawn = {pawn}, targetCell = {targetCell})");
+        if (pawn != null)
+        {
+            var team = pawn.Team;
+            var playerTeam = _worldLogic.PlayerTeam;
+
+            switch (_selectedAbility.Target)
+            {
+                case WorldLogic.SelectionState.EnemyPawns when team == playerTeam || team == WorldLogic.Team.World:
+                    GD.PushWarning("Selected pawn is on the same team as the player, cannot execute ability");
+                    return;
+                case WorldLogic.SelectionState.TeamPawns when team != playerTeam || team == WorldLogic.Team.World:
+                    GD.PushWarning("Selected pawn is NOT on the same team as the player, cannot execute ability");
+                    return;
+            }
+        }
+        
+        GD.Print($"Resolving ability '{_selectedAbility.AbilityName}' for {_selectedPawn}, (pawn = {pawn}, targetCell = {targetCell})");
 
         var context = new AbilityExecutionContext(
             _worldLogic,

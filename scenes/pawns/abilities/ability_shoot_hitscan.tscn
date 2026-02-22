@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dgi8dj8vycr4h"]
+
+[ext_resource type="Script" uid="uid://c7lakw8cqg4cr" path="res://scripts/pawns/abilities/ShootHitscanAbility.cs" id="1_ngx5v"]
+
+[node name="AbilityShootHitscan" type="Node3D" unique_id=940195924]
+script = ExtResource("1_ngx5v")
+AbilityName = "Shoot Hitscan"
+Target = 1
+Cost = 1

@@ -177,7 +177,14 @@ public partial class GridDebugRenderer : Node3D
     private void EnsureNodes()
     {
         _gridManager ??= GetParent<GridManager>();
-        _worldLogic ??= _gridManager?.GetParent<WorldLogic>();
+        if (_worldLogic == null && _gridManager != null)
+        {
+            _worldLogic = _gridManager.GetParent() as WorldLogic;
+        }
+
+        if (_gridManager == null)
+            return;
+
         _mmi ??= new MultiMeshInstance3D();
         
         if (_mmi.GetParent() == null) AddChild(_mmi);
@@ -259,6 +266,9 @@ public partial class GridDebugRenderer : Node3D
     public void Rebuild()
     {
         EnsureNodes();
+
+        if (_gridManager == null || _mm == null)
+            return;
         
         // Settings (tweak in inspector if you want)
         float y = YOffset;              // your existing Y offset

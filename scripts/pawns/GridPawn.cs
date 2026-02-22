@@ -132,6 +132,6 @@ public partial class GridPawn : Node3D
     public override string ToString()
     {
         var abilities = string.Join(", ", _pawnAbilities.Select(x => x.AbilityName));
-        return $"[PAWN] {Name}, Abilities: {abilities}";
+        return $"[PAWN] {Name}, Team: {Team.ToString()}, Abilities: {abilities}";
     }
 }

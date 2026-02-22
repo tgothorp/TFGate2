@@ -83,7 +83,7 @@ public partial class WorldLogic : Node3D
         TargetingContext ??= new TargetingContext();
         TargetingContext.Clear();
     }
-
+    
     public void GridCellSelected(GridCell cell)
     {
         if (TargetingContext is { IsActive: true } && _pawnManager != null)
