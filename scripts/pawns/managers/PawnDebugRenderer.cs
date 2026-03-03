@@ -108,8 +108,8 @@ public partial class PawnDebugRenderer : Node3D
 
             mesh.MaterialOverlay = pawn.Team switch
             {
-                WorldLogic.Team.Red => _redTeamMaterial,
-                WorldLogic.Team.Blue => _blueTeamMaterial,
+                Team.Red => _redTeamMaterial,
+                Team.Blue => _blueTeamMaterial,
                 _ => mesh.MaterialOverlay
             };
         }

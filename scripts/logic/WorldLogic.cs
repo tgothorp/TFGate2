@@ -103,11 +103,4 @@ public partial class WorldLogic : Node3D
         // Only the grid can be selected
         Grid,
     }
-    
-    public enum Team
-    {
-        World,
-        Blue,
-        Red,
-    }
 }

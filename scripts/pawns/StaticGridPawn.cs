@@ -6,4 +6,9 @@ using System;
 /// </summary>
 public partial class StaticGridPawn : GridPawn
 {
+    public override void _Ready()
+    {
+        HitPoints = uint.MaxValue;
+        base._Ready();
+    }
 }

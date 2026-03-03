@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using TFGate2.scripts.grid;
 
@@ -7,6 +8,9 @@ public abstract partial class PawnAbility : Node3D
 {
     [Export]
     public string AbilityName { get; set; }
+    
+    [Export]
+    public string AbilityDescription { get; set; }
 
     [Export]
     public WorldLogic.SelectionState Target { get; set; }
@@ -31,8 +35,28 @@ public abstract partial class PawnAbility : Node3D
         _owner = owner;
     }
 
-    public abstract bool CanExecute(AbilityExecutionContext context);
-    public abstract void Execute(AbilityExecutionContext context);
+    public virtual bool CanExecute(AbilityExecutionContext context)
+    {
+        return Pawn.CanPerformAction(Cost);
+    }
+
+    public virtual void Execute(AbilityExecutionContext context)
+    {
+        switch (Cost)
+        {
+            case AbilityCost.Action:
+                Pawn.HasTakenAction = true;
+                break;
+            case AbilityCost.BonusAction:
+                Pawn.HasTakenBonusAction = true;
+                break;
+            case AbilityCost.Reaction:
+                Pawn.HasTakenReaction = true;
+                break;
+            default:
+                return;
+        }
+    }
 
     public enum AbilityCost
     {

@@ -13,12 +13,15 @@ public partial class GridPawn : Node3D
     public bool ShouldSnapToCellCenter { get; set; } = false;
 
     [Export(hintString: "Team this pawn belongs to.")]
-    public WorldLogic.Team Team { get; set; }
+    public Team Team { get; set; }
 
     [Export(hintString: "How much movement this pawn can perform per turn.")]
     public int MoveBudget { get; set; }
     public int RemainingMoveBudget { get; set; }
 
+    [Export]
+    public uint HitPoints { get; set; }
+    
     [Export]
     public bool CanTakeAction { get; set; }
     public bool HasTakenAction { get; set; }
@@ -30,6 +33,9 @@ public partial class GridPawn : Node3D
     [Export]
     public bool CanTakeReaction { get; set; }
     public bool HasTakenReaction { get; set; }
+
+    [Export]
+    public CollisionShape3D CollisionShape { get; set; }
 
     public GridCell OccupiedCell { get; private set; }
 
@@ -84,6 +90,11 @@ public partial class GridPawn : Node3D
         }
 
         return _pawnAbilities;
+    }
+
+    public Vector3 GetCenterMass()
+    {
+        return CollisionShape.GlobalPosition;
     }
 
     public void StartTurn()

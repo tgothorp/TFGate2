@@ -103,10 +103,10 @@ public partial class PawnManager : Node3D
 
             switch (_selectedAbility.Target)
             {
-                case WorldLogic.SelectionState.EnemyPawns when team == playerTeam || team == WorldLogic.Team.World:
+                case WorldLogic.SelectionState.EnemyPawns when team == playerTeam || team == Team.World:
                     GD.PushWarning("Selected pawn is on the same team as the player, cannot execute ability");
                     return;
-                case WorldLogic.SelectionState.TeamPawns when team != playerTeam || team == WorldLogic.Team.World:
+                case WorldLogic.SelectionState.TeamPawns when team != playerTeam || team == Team.World:
                     GD.PushWarning("Selected pawn is NOT on the same team as the player, cannot execute ability");
                     return;
             }

@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://bobamn27y443l"]
+
+[ext_resource type="Script" uid="uid://c7lakw8cqg4cr" path="res://scripts/pawns/abilities/ShootHitscanAbility.cs" id="1_ube3c"]
+
+[node name="AbilityShotgun" type="Node3D" unique_id=1616558126]
+script = ExtResource("1_ube3c")
+MaxEffectiveRange = 3
+MaxRange = 7
+AbilityName = "Shotgun"
+AbilityDescription = "Unload 30 pellets at your enemy"
+Target = 1
+Cost = 2

@@ -34,7 +34,7 @@ public partial class MoveAbility : PawnAbility
             return false;
         }
 
-        return true;
+        return base.CanExecute(context);
     }
 
     public override void Execute(AbilityExecutionContext context)

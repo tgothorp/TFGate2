@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://s8aqp1jhpd45" path="res://scenes/util/world_manager.tscn" id="3_a64th"]
 [ext_resource type="PackedScene" uid="uid://cs5y7hnbsrd8b" path="res://scenes/pawns/grid_occupier_static.tscn" id="3_xf1sy"]
 [ext_resource type="PackedScene" uid="uid://clrfkabsjhime" path="res://scenes/util/pawn_manager.tscn" id="4_b4sxl"]
+[ext_resource type="PackedScene" uid="uid://b80j6ptt5vgk" path="res://scenes/pawns/characters/pawn_soldier.tscn" id="6_ea3gy"]
 [ext_resource type="PackedScene" uid="uid://bmvtmkud3gnhv" path="res://scenes/pawns/moveable_pawn.tscn" id="6_qm7gn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h320y"]
@@ -115,9 +116,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 32.83
 
 [node name="PlayerPawns" type="Node3D" parent="." unique_id=844967900]
 
-[node name="MoveablePawn_Red" parent="PlayerPawns" unique_id=665968329 instance=ExtResource("6_qm7gn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, 15)
-MoveBudget = 7
+[node name="PawnSoldier" parent="PlayerPawns" unique_id=277971800 instance=ExtResource("6_ea3gy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 0, 21)
 
 [node name="MoveablePawn_Blu" parent="PlayerPawns" unique_id=1427291965 instance=ExtResource("6_qm7gn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 33)
