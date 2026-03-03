@@ -1,6 +1,4 @@
-using System;
 using Godot;
-using TFGate2.scripts.grid;
 
 namespace TFGate2.scripts.pawns.abilities;
 
@@ -24,12 +22,12 @@ public abstract partial class PawnAbility : Node3D
     [Export(hintString:"Can this ability ONLY target the owner?")]
     public bool CanOnlyTargetSelf { get; set; }
 
-    public GridPawn Pawn => _owner;
+    public PlayerPawn Pawn => _owner;
     
     private WorldLogic _worldLogic;
-    private GridPawn _owner;
+    private PlayerPawn _owner;
     
-    public void Register(WorldLogic worldLogic, GridPawn owner)
+    public void Register(WorldLogic worldLogic, PlayerPawn owner)
     {
         _worldLogic = worldLogic;
         _owner = owner;
@@ -37,9 +35,19 @@ public abstract partial class PawnAbility : Node3D
 
     public virtual bool CanExecute(AbilityExecutionContext context)
     {
-        return Pawn.CanPerformAction(Cost);
+        return Pawn.CanPerformAbility(this);
     }
 
+    public void BeginExecute(AbilityExecutionContext context)
+    {
+        var oldState = context.WorldLogic.CurrentSelectionState;
+        context.WorldLogic.UpdateSelectionState(WorldLogic.SelectionState.Nothing);
+        
+        Execute(context);
+
+        context.WorldLogic.UpdateSelectionState(oldState);
+    }
+    
     public virtual void Execute(AbilityExecutionContext context)
     {
         switch (Cost)
@@ -53,6 +61,8 @@ public abstract partial class PawnAbility : Node3D
             case AbilityCost.Reaction:
                 Pawn.HasTakenReaction = true;
                 break;
+            case AbilityCost.Free:
+            case AbilityCost.Special:
             default:
                 return;
         }

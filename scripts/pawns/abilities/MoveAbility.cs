@@ -15,7 +15,13 @@ public partial class MoveAbility : PawnAbility
             return false;
         }
 
-        if (context.SourcePawn.OccupiedCell == null || context.SourcePawn.MoveBudget <= 0)
+        if (context.SourcePawn is not MoveablePawn pawn)
+        {
+            GD.PrintErr("Move ability was called on a non-moveable pawn!");
+            return false;
+        }
+
+        if (pawn.OccupiedCell == null || pawn is { MoveBudget: <= 0 })
         {
             GD.PrintErr("Pawn cannot move!");
             return false;
@@ -28,7 +34,7 @@ public partial class MoveAbility : PawnAbility
             return false;
         }
 
-        if (_path.Cost > context.SourcePawn.MoveBudget)
+        if (_path.Cost > pawn.MoveBudget)
         {
             GD.PrintErr("Path is too expensive!");
             return false;
@@ -39,27 +45,14 @@ public partial class MoveAbility : PawnAbility
 
     public override void Execute(AbilityExecutionContext context)
     {
-        if (!_path.PathIsValid || _path.Cost > context.SourcePawn.MoveBudget || context.SourcePawn.MoveBudget <= 0)
+        var pawn = context.SourcePawn as MoveablePawn;
+        if (!_path.PathIsValid || _path.Cost > pawn!.MoveBudget || pawn!.MoveBudget <= 0)
         {
             GD.PushWarning($"Pawn move state is not valid ({_path})");
         }
         
         GD.Print($"[ABILITY] Move executed by {context.SourcePawn.Name}. Path: {_path}");
-        context.SourcePawn.SetMoveBudget(context.SourcePawn.MoveBudget - _path.Cost);
-
-        // if (!CanExecute(context))
-        //     return;
-        //
-        // var sourceCell = context.SourcePawn.OccupiedCell;
-        // var targetCell = context.TargetCell;
-        // var movementCost = Mathf.Abs(sourceCell.Coordinate.X - targetCell.Coordinate.X) +
-        //                    Mathf.Abs(sourceCell.Coordinate.Y - targetCell.Coordinate.Y);
-        //
-        // if (!context.GridManager.TryMovePawnToCell(context.SourcePawn, targetCell))
-        //     return;
-        //
-        // _remainingDistance = Math.Max(0, _remainingDistance - movementCost);
-        // GD.Print($"[ABILITY] Move executed by {context.SourcePawn.Name}. Remaining distance: {_remainingDistance}");
+        pawn!.SetMoveBudget(pawn!.MoveBudget - _path.Cost);   
     }
 
     private static GridPath ResolvePath(AbilityExecutionContext context)

@@ -106,12 +106,15 @@ public partial class PawnDebugRenderer : Node3D
             if (mesh == null)
                 continue;
 
-            mesh.MaterialOverlay = pawn.Team switch
+            if (pawn is CharacterPawn characterPawn)
             {
-                Team.Red => _redTeamMaterial,
-                Team.Blue => _blueTeamMaterial,
-                _ => mesh.MaterialOverlay
-            };
+                mesh.MaterialOverlay = characterPawn.Team switch
+                {
+                    Team.Red => _redTeamMaterial,
+                    Team.Blue => _blueTeamMaterial,
+                    _ => mesh.MaterialOverlay
+                };
+            }
         }
     }
 

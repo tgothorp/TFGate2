@@ -1,14 +1,7 @@
-using Godot;
-using System;
-
 /// <summary>
-/// Does nothing except occupy a cell in the grid.
+/// Does nothing except occupy a cell in the grid, static pawns are not selectable.
 /// </summary>
 public partial class StaticGridPawn : GridPawn
 {
-    public override void _Ready()
-    {
-        HitPoints = uint.MaxValue;
-        base._Ready();
-    }
+
 }

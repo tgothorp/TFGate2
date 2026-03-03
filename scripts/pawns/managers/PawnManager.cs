@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using TFGate2.scripts.grid;
+using TFGate2.scripts.pawns;
 using TFGate2.scripts.pawns.abilities;
 using TFGate2.scripts.pawns.managers;
 
@@ -74,10 +75,10 @@ public partial class PawnManager : Node3D
 
         _uiController.UpdatePawnData();
         
-        if (IsResolvingAbility)
+        if (IsResolvingAbility && pawn is CharacterPawn characterPawn)
         {
             // We have selected a pawn as part of an action resolution
-            ResolveAbility(pawn, null);
+            ResolveAbility(characterPawn, null);
             return;
         }
 
@@ -91,7 +92,7 @@ public partial class PawnManager : Node3D
         _worldLogic.UpdateTargetingContext(_selectedAbility);
     }
 
-    public void ResolveAbility(GridPawn pawn, GridCell targetCell)
+    public void ResolveAbility(CharacterPawn pawn, GridCell targetCell)
     {
         if (_selectedAbility == null || _selectedPawn == null || _worldLogic == null || _gridManager == null)
             return;
@@ -128,7 +129,7 @@ public partial class PawnManager : Node3D
             return;
         }
 
-        _selectedAbility.Execute(context);
+        _selectedAbility.BeginExecute(context);
         _uiController.UpdatePawnData();
 
         DeselectAbility();

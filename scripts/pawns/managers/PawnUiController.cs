@@ -64,13 +64,16 @@ public partial class PawnUiController : Control
             child.QueueFree();
         }
 
-        DisplayDataForPawn();
-
-        if (_pawnManager.SelectedPawn.Team == _worldLogic.PlayerTeam)
+        if (_pawnManager.SelectedPawn is PlayerPawn playerPawn)
         {
-            DisplayAbilitiesForPawn();
+            DisplayDataForPawn(playerPawn);
+            
+            if (playerPawn.Team == _worldLogic.PlayerTeam)
+            {
+                DisplayAbilitiesForPawn(playerPawn);
+            }
         }
-        
+
         _shouldRedraw = false;
         base._Process(delta);
     }
@@ -80,15 +83,15 @@ public partial class PawnUiController : Control
         _shouldRedraw = true;
     }
 
-    private void DisplayDataForPawn()
+    private void DisplayDataForPawn(PlayerPawn playerPawn)
     {
-        var idLabel = new Label { Text = $"ID: {_pawnManager.SelectedPawn.PawnId}" };
-        var teamLabel = new Label { Text = $"Team: {_pawnManager.SelectedPawn.Team.ToString()}" };
-        var moveBudgetLabel = new Label { Text = $"Move Budget: {_pawnManager.SelectedPawn.MoveBudget}" };
-        var remainingMoveBudgetLabel = new Label { Text = $"Remaining Move Budget: {_pawnManager.SelectedPawn.RemainingMoveBudget}" };
-        var actionLabel = new Label { Text = $"Action: {_pawnManager.SelectedPawn.CanTakeAction.ToString()}" };
-        var bonusActionLabel = new Label { Text = $"Bonus Action: {_pawnManager.SelectedPawn.CanTakeBonusAction.ToString()}" };
-        var reactionLabel = new Label { Text = $"Reaction: {_pawnManager.SelectedPawn.CanTakeReaction.ToString()}" };
+        var idLabel = new Label { Text = $"ID: {playerPawn.PawnId}" };
+        var teamLabel = new Label { Text = $"Team: {playerPawn.Team.ToString()}" };
+        var moveBudgetLabel = new Label { Text = $"Move Budget: {playerPawn.MoveBudget}" };
+        var remainingMoveBudgetLabel = new Label { Text = $"Remaining Move Budget: {playerPawn.RemainingMoveBudget}" };
+        var actionLabel = new Label { Text = $"Action: {playerPawn.CanTakeAction.ToString()}" };
+        var bonusActionLabel = new Label { Text = $"Bonus Action: {playerPawn.CanTakeBonusAction.ToString()}" };
+        var reactionLabel = new Label { Text = $"Reaction: {playerPawn.CanTakeReaction.ToString()}" };
         
         _dataContainer.AddChild(idLabel);
         _dataContainer.AddChild(teamLabel);
@@ -99,9 +102,9 @@ public partial class PawnUiController : Control
         _dataContainer.AddChild(reactionLabel);
     }
     
-    private void DisplayAbilitiesForPawn()
+    private void DisplayAbilitiesForPawn(PlayerPawn playerPawn)
     {
-        var abilities = _pawnManager.SelectedPawn.GetAbilities(null);
+        var abilities = playerPawn.GetAbilities(null);
         for (var i = 0; i < abilities.Count; i++)
         {
             var ability = abilities[i];
