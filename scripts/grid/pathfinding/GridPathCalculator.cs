@@ -20,10 +20,10 @@ public static class GridPathCalculator
     public static GridPath CalculatePath(GridManager gridManager, Vector2I start, Vector2I end)
     {
         if (gridManager == null || !gridManager.IsWithinBounds(start) || !gridManager.IsWithinBounds(end))
-            return new GridPath(false, start, end, [], 0);
+            return new GridPath(false, start, end, [], [], 0);
 
         if (start == end)
-            return new GridPath(true, start, end, [], 0);
+            return new GridPath(true, start, end, [], [], 0);
 
         var openSet = new HashSet<Vector2I> { start };
         var closedSet = new HashSet<Vector2I>();
@@ -36,7 +36,7 @@ public static class GridPathCalculator
         {
             var current = GetBestOpenNode(openSet, nodes);
             if (current == end)
-                return BuildPath(nodes, start, end);
+                return BuildPath(gridManager, nodes, start, end);
 
             openSet.Remove(current);
             closedSet.Add(current);
@@ -73,10 +73,10 @@ public static class GridPathCalculator
             }
         }
 
-        return new GridPath(false, start, end, [], 0);
+        return new GridPath(false, start, end, [], [], 0);
     }
 
-    private static GridPath BuildPath(Dictionary<Vector2I, GridPathCell> nodes, Vector2I start, Vector2I end)
+    private static GridPath BuildPath(GridManager gridManager, Dictionary<Vector2I, GridPathCell> nodes, Vector2I start, Vector2I end)
     {
         var reversedPath = new List<Vector2I>();
         var current = end;
@@ -84,16 +84,22 @@ public static class GridPathCalculator
         while (current != start)
         {
             if (!nodes.TryGetValue(current, out var currentCell))
-                return new GridPath(false, start, end, [], 0);
+                return new GridPath(false, start, end, [], [], 0);
 
             reversedPath.Add(current);
             current = currentCell.Parent;
         }
 
         reversedPath.Reverse();
+        
         var finalPath = reversedPath.ToArray();
+        var worldPath = new List<Vector3>();
+        foreach (var cellCoordinate in finalPath)
+        {
+            worldPath.Add(gridManager.GridToWorld(cellCoordinate));
+        }
 
-        return new GridPath(true, start, end, finalPath, finalPath.Length);
+        return new GridPath(true, start, end, finalPath, worldPath.ToArray(), finalPath.Length);
     }
 
     private static Vector2I GetBestOpenNode(HashSet<Vector2I> openSet, Dictionary<Vector2I, GridPathCell> nodes)

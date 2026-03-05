@@ -1,6 +1,6 @@
 using Godot;
 
-namespace TFGate2.scripts.utils;
+namespace TFGate2.scripts.extensions;
 
 public class Vector3Extensions
 {

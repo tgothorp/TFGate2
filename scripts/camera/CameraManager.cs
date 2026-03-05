@@ -1,5 +1,5 @@
 using Godot;
-using TFGate2.scripts.utils;
+using TFGate2.scripts.extensions;
 
 /// <summary>
 /// Handles tactical camera movement, rotation, and zoom input.

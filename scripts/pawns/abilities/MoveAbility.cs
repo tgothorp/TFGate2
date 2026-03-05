@@ -49,10 +49,15 @@ public partial class MoveAbility : PawnAbility
         if (!_path.PathIsValid || _path.Cost > pawn!.MoveBudget || pawn!.MoveBudget <= 0)
         {
             GD.PushWarning($"Pawn move state is not valid ({_path})");
+            return;
         }
         
         GD.Print($"[ABILITY] Move executed by {context.SourcePawn.Name}. Path: {_path}");
-        pawn!.SetMoveBudget(pawn!.MoveBudget - _path.Cost);   
+
+        if (pawn.Mover.TryStart(_path))
+        {
+            pawn!.SetMoveBudget(pawn!.MoveBudget - _path.Cost);   
+        }
     }
 
     private static GridPath ResolvePath(AbilityExecutionContext context)

@@ -61,7 +61,8 @@ public partial class PlayerPawn : CharacterPawn
             case PawnAbility.AbilityCost.Reaction:
                 return !HasTakenReaction;
             case PawnAbility.AbilityCost.Special:
-            //TODO
+                //TODO
+                return true;
             default:
                 return false;
         }

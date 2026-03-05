@@ -12,7 +12,22 @@ public partial class MoveablePawn : GridPawn
     public int MoveBudget { get; set; }
     public int RemainingMoveBudget { get; set; }
 
-    public PawnMover Mover { get; } = new();
+    [Export(hintString: "How fast this pawn can move.")]
+    public float MoveSpeed { get; set; } = 5f;
+    
+    [Export]
+    public CharacterBody3D CharacterBody3D { get; set; }
+
+    public PawnMover Mover { get; private set; }
+
+    public override void _EnterTree()
+    {
+        Mover = new PawnMover();
+        AddChild(Mover);
+        Mover.Initialize(this);
+
+        base._EnterTree();
+    }
 
     public override void _Ready()
     {

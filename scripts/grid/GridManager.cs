@@ -123,10 +123,10 @@ public partial class GridManager : Node3D
             return GridPath.Invalid;
 
         if (startCell.Coordinate == endCell.Coordinate)
-            return new GridPath(true, startCell.Coordinate, endCell.Coordinate, [], 0);
+            return new GridPath(true, startCell.Coordinate, endCell.Coordinate, [], [], 0);
 
         if (IsCellOccupied(endCell.Coordinate))
-            return new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], 0);
+            return new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], [], 0);
 
         return GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
     }

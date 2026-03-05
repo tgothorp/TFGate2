@@ -146,18 +146,18 @@ public partial class GridDebugRenderer : Node3D
             return;
 
         var path = _worldLogic.TargetingContext.PreviewPath;
-        if (!path.PathIsValid || path.Path.Length == 0)
+        if (!path.PathIsValid || path.CellPath.Length == 0)
         {
             HideAllPathHighlights();
             return;
         }
 
-        EnsurePathHighlights(path.Path.Length);
+        EnsurePathHighlights(path.CellPath.Length);
 
         var grid = GetParent<GridManager>();
-        for (var i = 0; i < path.Path.Length; i++)
+        for (var i = 0; i < path.CellPath.Length; i++)
         {
-            var cellCoordinate = path.Path[i];
+            var cellCoordinate = path.CellPath[i];
             var localPos = grid.GridToLocal(cellCoordinate);
             var highlight = _pathHighlights[i];
 
@@ -168,7 +168,7 @@ public partial class GridDebugRenderer : Node3D
             highlight.Visible = true;
         }
 
-        for (var i = path.Path.Length; i < _pathHighlights.Count; i++)
+        for (var i = path.CellPath.Length; i < _pathHighlights.Count; i++)
         {
             _pathHighlights[i].Visible = false;
         }

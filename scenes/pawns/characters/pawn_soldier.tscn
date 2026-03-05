@@ -4,21 +4,22 @@
 [ext_resource type="PackedScene" uid="uid://csf5ibsdpxp2v" path="res://scenes/pawns/abilities/ability_move_basic.tscn" id="2_dkthn"]
 [ext_resource type="PackedScene" uid="uid://bobamn27y443l" path="res://scenes/pawns/abilities/ability_shotgun.tscn" id="3_dx1g8"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_2nowl"]
-
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xdkk5"]
 
-[node name="PawnSoldier" type="Node3D" unique_id=277971800 node_paths=PackedStringArray("CollisionShape")]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_2nowl"]
+
+[node name="PawnSoldier" type="Node3D" unique_id=277971800 node_paths=PackedStringArray("CharacterBody3D", "CollisionShape")]
 script = ExtResource("1_dx1g8")
 Class = 1
-ShouldSnapToCellCenter = true
-Team = 2
-MoveBudget = 5
-HitPoints = 20
 CanTakeAction = true
 CanTakeBonusAction = true
 CanTakeReaction = true
-CollisionShape = NodePath("StaticBody3D/CollisionShape3D")
+HitPoints = 20
+Team = 2
+MoveBudget = 5
+CharacterBody3D = NodePath("CharacterBody3D")
+ShouldSnapToCellCenter = true
+CollisionShape = NodePath("CharacterBody3D/CollisionShape3D")
 
 [node name="Abilities" type="Node3D" parent="." unique_id=1316140104]
 
@@ -26,12 +27,12 @@ CollisionShape = NodePath("StaticBody3D/CollisionShape3D")
 
 [node name="AbilityShotgun" parent="Abilities" unique_id=1616558126 instance=ExtResource("3_dx1g8")]
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1368139782]
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=127101394]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=933371022]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_2nowl")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1648073395]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=1648073395]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_xdkk5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D" unique_id=933371022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_2nowl")
