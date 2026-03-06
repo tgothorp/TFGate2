@@ -113,10 +113,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 34.83
 [node name="GridOccupier23" parent="StaticPawns" unique_id=541827236 instance=ExtResource("3_xf1sy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.889301, 0.049999237, 32.834957)
 
+[node name="GridOccupier24" parent="StaticPawns" unique_id=1794311365 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.889301, 0.049999237, 30.834957)
+
+[node name="GridOccupier25" parent="StaticPawns" unique_id=1273062201 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.889301, 0.049999237, 28.834957)
+
+[node name="GridOccupier26" parent="StaticPawns" unique_id=842558021 instance=ExtResource("3_xf1sy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.889301, 0.049999237, 26.834957)
+
 [node name="PlayerPawns" type="Node3D" parent="." unique_id=844967900]
 
 [node name="PawnSoldier_Red" parent="PlayerPawns" unique_id=277971800 instance=ExtResource("6_ea3gy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 0, 21)
+MoveBudget = 20
+MoveSpeed = 10.0
 
 [node name="PawnSoldier_Blu" parent="PlayerPawns" unique_id=313672860 instance=ExtResource("6_ea3gy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, 27)

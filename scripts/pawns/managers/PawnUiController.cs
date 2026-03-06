@@ -87,14 +87,16 @@ public partial class PawnUiController : Control
     {
         var idLabel = new Label { Text = $"ID: {playerPawn.PawnId}" };
         var teamLabel = new Label { Text = $"Team: {playerPawn.Team.ToString()}" };
+        var hpLabel = new Label { Text = $"HP: {playerPawn.CurrentHitPoints.ToString()} / {playerPawn.HitPoints.ToString()}" };
         var moveBudgetLabel = new Label { Text = $"Move Budget: {playerPawn.MoveBudget}" };
         var remainingMoveBudgetLabel = new Label { Text = $"Remaining Move Budget: {playerPawn.RemainingMoveBudget}" };
-        var actionLabel = new Label { Text = $"Action: {playerPawn.CanTakeAction.ToString()}" };
-        var bonusActionLabel = new Label { Text = $"Bonus Action: {playerPawn.CanTakeBonusAction.ToString()}" };
-        var reactionLabel = new Label { Text = $"Reaction: {playerPawn.CanTakeReaction.ToString()}" };
+        var actionLabel = new Label { Text = $"Has Taken Action: {playerPawn.HasTakenAction.ToString()}" };
+        var bonusActionLabel = new Label { Text = $"Has Taken Bonus Action: {playerPawn.HasTakenBonusAction.ToString()}" };
+        var reactionLabel = new Label { Text = $"Has Taken Reaction: {playerPawn.HasTakenReaction.ToString()}" };
         
         _dataContainer.AddChild(idLabel);
         _dataContainer.AddChild(teamLabel);
+        _dataContainer.AddChild(hpLabel);
         _dataContainer.AddChild(moveBudgetLabel);
         _dataContainer.AddChild(remainingMoveBudgetLabel);
         _dataContainer.AddChild(actionLabel);

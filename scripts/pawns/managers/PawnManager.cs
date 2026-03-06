@@ -65,7 +65,9 @@ public partial class PawnManager : Node3D
     public void SelectPawn(GridPawn pawn)
     {
         _uiController.UpdatePawnData();
-        _selectedPawn = pawn;
+        
+        if (_worldLogic.SelectionContext is not {AbilityBeingResolved:true})
+            _selectedPawn = pawn;
 
         EmitSignal(SignalName.PawnSelected, pawn);
     }
@@ -112,7 +114,7 @@ public partial class PawnManager : Node3D
         DeselectAbility();
     }
 
-    private void DeselectAbility()
+    public void DeselectAbility()
     {
         GD.Print("Deselecting ability");
         _selectedAbility = null;
@@ -120,7 +122,7 @@ public partial class PawnManager : Node3D
         EmitSignal(SignalName.AbilitySelected, null);
     }
 
-    private void DeselectPawn()
+    public void DeselectPawn()
     {
         GD.Print("Deselecting pawn");
         _selectedPawn = null;

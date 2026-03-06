@@ -6,6 +6,7 @@
 script = ExtResource("1_ube3c")
 MaxEffectiveRange = 3
 MaxRange = 7
+Damage = 10
 AbilityName = "Shotgun"
 AbilityDescription = "Unload 30 pellets at your enemy"
 Target = 3

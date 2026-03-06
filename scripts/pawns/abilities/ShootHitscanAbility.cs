@@ -1,4 +1,5 @@
 using Godot;
+using TFGate2.scripts.pawns;
 using TFGate2.scripts.pawns.abilities;
 
 public partial class ShootHitscanAbility : PawnAbility
@@ -8,10 +9,13 @@ public partial class ShootHitscanAbility : PawnAbility
 
     [Export]
     public int MaxRange { get; set; }
-    
+
+    [Export]
+    public uint Damage { get; set; }
+
     public override bool CanExecute(AbilityExecutionContext context)
     {
-        if (!base.CanExecute(context)) 
+        if (!base.CanExecute(context))
             return false;
 
         var spaceState = GetWorld3D().DirectSpaceState;
@@ -25,11 +29,26 @@ public partial class ShootHitscanAbility : PawnAbility
             CollideWithBodies = true,
         });
 
-        return true;
+        if (rayResult.Count == 0)
+            return false;
+
+        var collider = rayResult["collider"].AsGodotObject();
+
+        if (collider == context.TargetPawn)
+            return true;
+
+        return collider is Node node && node.IsAncestorOf(context.TargetPawn);
     }
 
     public override void Execute(AbilityExecutionContext context)
     {
+        if (context.TargetPawn is CharacterPawn characterPawn)
+        {
+            characterPawn.TakeDamage(Damage);
+        }
+
         base.Execute(context);
+
+        EmitSignal(PawnAbility.SignalName.AbilityFinished);
     }
 }

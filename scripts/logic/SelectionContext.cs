@@ -82,6 +82,11 @@ public class SelectionContext
         }
     }
 
+    public void UpdateSelectionState(SelectionState newState)
+    {
+        ActiveSelectionState = newState;
+    }
+    
     public void DisableSelection()
     {
         ActiveSelectionState = SelectionState.Nothing;

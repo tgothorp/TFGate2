@@ -66,7 +66,10 @@ public partial class WorldLogic : Node3D
     private void OnPawnSelected(GridPawn pawn)
     {
         GD.Print($"[WORLD-LOGIC] Pawn selected: {pawn.Name}");
-        SelectionContext.PawnSelected(pawn);
+        if (SelectionContext is { AbilityBeingResolved: true })
+            _pawnManager.ResolveAbility(pawn, null);
+        else
+            SelectionContext.PawnSelected(pawn);
     }
 
     private void OnPawnAbilitySelected(PawnAbility ability)
@@ -89,7 +92,18 @@ public partial class WorldLogic : Node3D
         {
             if (mouseButton.ButtonIndex == MouseButton.Right && mouseButton.Pressed)
             {
-                // TODO: Deselect ability / pawn / cell
+                if (SelectionContext.AbilityBeingResolved)
+                {
+                    SelectionContext.AbilitySelected(null);
+                    SelectionContext.UpdateSelectionState(SelectionContext.SelectionState.AllPawns);
+                    _pawnManager.DeselectAbility();
+                }
+                else if (SelectionContext.SourcePawn != null)
+                {
+                    SelectionContext.PawnSelected(null);
+                    SelectionContext.UpdateSelectionState(SelectionContext.SelectionState.AllPawns);
+                    _pawnManager.DeselectPawn();
+                }
             }
         }
         base._UnhandledInput(@event);
