@@ -13,6 +13,7 @@ public partial class GridPath : Node
     public Vector2I[] CellPath { get; }
     public Vector3[] WorldPath { get; }
     public int Cost { get; }
+    public bool ExceedsBudget { get; }
 
     public GridPath() {}
 
@@ -21,7 +22,8 @@ public partial class GridPath : Node
         Vector2I end,
         Vector2I[] cellPath,
         Vector3[] worldPath,
-        int cost)
+        int cost,
+        bool exceedsBudget = false)
     {
         PathIsValid = pathIsValid;
         Start = start;
@@ -29,9 +31,10 @@ public partial class GridPath : Node
         CellPath = cellPath;
         WorldPath = worldPath;
         Cost = cost;
+        ExceedsBudget = exceedsBudget;
     }
 
     public static GridPath Invalid => new GridPath(false, Vector2I.Zero, Vector2I.Zero, [], [], 0);
 
-    public override string ToString() => $"PathIsValid: {PathIsValid}, Start: {Start}, End: {End}, Cost: {Cost}";
+    public override string ToString() => $"PathIsValid: {PathIsValid}, Start: {Start}, End: {End}, Cost: {Cost}, ExceedsBudget: {ExceedsBudget}";
 }

@@ -17,7 +17,7 @@ public static class GridPathCalculator
         new Vector2I(1, 1)
     ];
 
-    public static GridPath CalculatePath(GridManager gridManager, Vector2I start, Vector2I end)
+    public static GridPath CalculatePath(GridManager gridManager, Vector2I start, Vector2I end, int budget)
     {
         if (gridManager == null || !gridManager.IsWithinBounds(start) || !gridManager.IsWithinBounds(end))
             return new GridPath(false, start, end, [], [], 0);
@@ -36,7 +36,7 @@ public static class GridPathCalculator
         {
             var current = GetBestOpenNode(openSet, nodes);
             if (current == end)
-                return BuildPath(gridManager, nodes, start, end);
+                return BuildPath(gridManager, nodes, start, end, budget);
 
             openSet.Remove(current);
             closedSet.Add(current);
@@ -76,7 +76,7 @@ public static class GridPathCalculator
         return new GridPath(false, start, end, [], [], 0);
     }
 
-    private static GridPath BuildPath(GridManager gridManager, Dictionary<Vector2I, GridPathCell> nodes, Vector2I start, Vector2I end)
+    private static GridPath BuildPath(GridManager gridManager, Dictionary<Vector2I, GridPathCell> nodes, Vector2I start, Vector2I end, int budget)
     {
         var reversedPath = new List<Vector2I>();
         var current = end;
@@ -99,7 +99,9 @@ public static class GridPathCalculator
             worldPath.Add(gridManager.GridToWorld(cellCoordinate));
         }
 
-        return new GridPath(true, start, end, finalPath, worldPath.ToArray(), finalPath.Length);
+        var pathCost = finalPath.Length;
+        var exceedsBudget = budget >= 0 && pathCost > budget;
+        return new GridPath(true, start, end, finalPath, worldPath.ToArray(), pathCost, exceedsBudget);
     }
 
     private static Vector2I GetBestOpenNode(HashSet<Vector2I> openSet, Dictionary<Vector2I, GridPathCell> nodes)

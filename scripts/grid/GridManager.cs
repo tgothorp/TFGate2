@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using TFGate2.scripts.pawns;
 
 namespace TFGate2.scripts.grid;
 
@@ -153,7 +154,11 @@ public partial class GridManager : Node3D
             return PreviewPath;
         }
 
-        PreviewPath = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
+        var budget = -1;
+        if (_worldLogic?.SelectionContext.SourcePawn is MoveablePawn moveablePawn)
+            budget = moveablePawn.RemainingMoveBudget;
+
+        PreviewPath = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate, budget);
 
         return PreviewPath;
     }

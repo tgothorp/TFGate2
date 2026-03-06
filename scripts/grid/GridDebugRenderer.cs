@@ -94,6 +94,17 @@ public partial class GridDebugRenderer : Node3D
             UpdatePathMaterials();
         }
     }
+    
+    [Export]
+    public Color OverBudgetPathColor
+    {
+        get => _overBudgetPathColor;
+        set
+        {
+            _overBudgetPathColor = value;
+            UpdatePathMaterials();
+        }
+    }
 
     [Export]
     public float PathYOffset
@@ -112,6 +123,7 @@ public partial class GridDebugRenderer : Node3D
     private Color _selectionColor = new(0.2f, 1f, 0.2f, 0.85f);
     private Color _hoverColor = new(0.2f, 1f, 0.2f, 0.45f);
     private Color _pathColor = new(0.2f, 0.7f, 1f, 0.35f);
+    private Color _overBudgetPathColor = new(1f, 0.2f, 0.2f, 0.45f);
     private float _selectionYOffset = 0.08f;
     private float _pathYOffset = 0.06f;
     private const float HoverYOffset = 0.07f;
@@ -152,6 +164,8 @@ public partial class GridDebugRenderer : Node3D
             return;
         }
 
+        var activeColor = path.ExceedsBudget ? _overBudgetPathColor : _pathColor;
+
         EnsurePathHighlights(path.CellPath.Length);
 
         var grid = GetParent<GridManager>();
@@ -163,6 +177,8 @@ public partial class GridDebugRenderer : Node3D
 
             var planeMesh = (PlaneMesh)highlight.Mesh;
             planeMesh.Size = new Vector2(grid.CellSize, grid.CellSize);
+            if (highlight.MaterialOverride is StandardMaterial3D pathMat)
+                pathMat.AlbedoColor = activeColor;
 
             highlight.Position = new Vector3(localPos.X, _pathYOffset, localPos.Z);
             highlight.Visible = true;
@@ -417,11 +433,14 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdatePathMaterials()
     {
+        var path = _gridManager?.PreviewPath;
+        var activeColor = path != null && path.ExceedsBudget ? _overBudgetPathColor : _pathColor;
+
         for (var i = 0; i < _pathHighlights.Count; i++)
         {
             if (_pathHighlights[i].MaterialOverride is StandardMaterial3D mat)
             {
-                mat.AlbedoColor = _pathColor;
+                mat.AlbedoColor = activeColor;
             }
         }
     }
