@@ -8,7 +8,7 @@
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_2nowl"]
 
-[node name="PawnSoldier" type="CharacterBody3D" unique_id=920060864 node_paths=PackedStringArray("CharacterBody3D", "CollisionShape")]
+[node name="PawnSoldier" type="CharacterBody3D" unique_id=920060864 node_paths=PackedStringArray("CollisionShape")]
 script = ExtResource("1_dx1g8")
 Class = 1
 CanTakeAction = true
@@ -17,7 +17,6 @@ CanTakeReaction = true
 HitPoints = 20
 Team = 2
 MoveBudget = 5
-CharacterBody3D = NodePath(".")
 ShouldSnapToCellCenter = true
 CollisionShape = NodePath("CollisionShape3D")
 
@@ -34,3 +33,9 @@ shape = SubResource("CapsuleShape3D_xdkk5")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=933371022]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("CapsuleMesh_2nowl")
+
+[node name="HealthLabel" type="Label3D" parent="." unique_id=1769746052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2045245, 0)
+pixel_size = 0.01
+billboard = 1
+text = "HEALTH"
