@@ -47,7 +47,7 @@ public partial class MoveAbility : PawnAbility
     public override void Execute(AbilityExecutionContext context)
     {
         var pawn = context.SourcePawn as MoveablePawn;
-        if (!_path.PathIsValid || _path.Cost > pawn!.MoveBudget || pawn!.MoveBudget <= 0)
+        if (!_path.PathIsValid || _path.Cost > pawn!.RemainingMoveBudget || pawn.RemainingMoveBudget <= 0)
         {
             GD.PushWarning($"Pawn move state is not valid ({_path})");
             return;
@@ -74,15 +74,14 @@ public partial class MoveAbility : PawnAbility
 
     private static GridPath ResolvePath(AbilityExecutionContext context)
     {
-        var targetingContext = context.WorldLogic.SelectionContext;
-        if (targetingContext != null && targetingContext.SelectedPath.PathIsValid)
+        var confirmedPath = context.ConfirmedPath;
+        if (confirmedPath.PathIsValid)
         {
-            var previewPath = targetingContext.SelectedPath;
             var sourceCoordinate = context.SourcePawn.OccupiedCell.Coordinate;
             var targetCoordinate = context.TargetCell.Coordinate;
 
-            if (previewPath.Start == sourceCoordinate && previewPath.End == targetCoordinate)
-                return previewPath;
+            if (confirmedPath.Start == sourceCoordinate && confirmedPath.End == targetCoordinate)
+                return confirmedPath;
         }
 
         return context.GridManager.FindPath(context.SourcePawn.OccupiedCell, context.TargetCell);

@@ -142,10 +142,10 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdatePathHighlight()
     {
-        if (_gridManager == null || _worldLogic?.SelectionContext == null)
+        if (_gridManager == null)
             return;
 
-        var path = _worldLogic.SelectionContext.SelectedPath;
+        var path = _gridManager.PreviewPath;
         if (!path.PathIsValid || path.CellPath.Length == 0)
         {
             HideAllPathHighlights();
@@ -356,14 +356,14 @@ public partial class GridDebugRenderer : Node3D
     
     private void UpdateHoverHighlight()
     {
-        if (!_showSelection || _hoverHighlight == null || _worldLogic?.SelectionContext is not { CanSelectGrid: true })
+        if (!_showSelection || _hoverHighlight == null || _gridManager is not { CanSelectGrid: true })
         {
             if (_hoverHighlight != null)
                 _hoverHighlight.Visible = false;
             return;
         }
 
-        var hoveredCell = _worldLogic.SelectionContext.HoveredCell;
+        var hoveredCell = _gridManager.HoveredCell;
         if (hoveredCell == null)
         {
             _hoverHighlight.Visible = false;

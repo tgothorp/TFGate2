@@ -14,7 +14,8 @@ public readonly struct AbilityExecutionContext
         GridManager gridManager,
         GridPawn sourcePawn,
         GridPawn targetPawn,
-        GridCell targetCell)
+        GridCell targetCell,
+        GridPath confirmedPath)
     {
         WorldLogic = worldLogic;
         PawnManager = pawnManager;
@@ -22,6 +23,7 @@ public readonly struct AbilityExecutionContext
         SourcePawn = sourcePawn;
         TargetPawn = targetPawn;
         TargetCell = targetCell;
+        ConfirmedPath = confirmedPath;
     }
 
     public WorldLogic WorldLogic { get; }
@@ -30,4 +32,5 @@ public readonly struct AbilityExecutionContext
     public GridPawn SourcePawn { get; }
     public GridPawn TargetPawn { get; }
     public GridCell TargetCell { get; }
+    public GridPath ConfirmedPath { get; }
 }

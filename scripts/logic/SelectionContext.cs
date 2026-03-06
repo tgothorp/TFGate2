@@ -19,9 +19,8 @@ public class SelectionContext
     public PawnAbility PawnAbility { get; private set; }
     public GridPawn SourcePawn { get; private set; }
 
-    public GridCell HoveredCell { get; private set; }
     public GridCell SelectedCell { get; private set; }
-    public GridPath SelectedPath { get; private set; }
+    public GridPath ConfirmedPath { get; private set; }
 
     public SelectionState ActiveSelectionState { get; set; }
 
@@ -32,9 +31,9 @@ public class SelectionContext
     {
         PawnAbility = null;
         SourcePawn = null;
-        HoveredCell = null;
         SelectedCell = null;
-        SelectedPath = GridPath.Invalid;
+        ConfirmedPath = GridPath.Invalid;
+        AbilityBeingResolved = false;
         ActiveSelectionState = SelectionState.AllPawns;
     }
 
@@ -43,11 +42,11 @@ public class SelectionContext
         SelectedCell = cell;
     }
 
-    public void GridPathSelected(GridPath path)
+    public void ConfirmPath(GridPath path)
     {
-        SelectedPath = path;
+        ConfirmedPath = path ?? GridPath.Invalid;
     }
-    
+
     public void PawnSelected(GridPawn pawn)
     {
         SourcePawn = pawn;
@@ -57,6 +56,7 @@ public class SelectionContext
     {
         AbilityBeingResolved = pawnAbility != null;
         PawnAbility = pawnAbility;
+        ConfirmedPath = GridPath.Invalid;
 
         if (pawnAbility == null)
             return;

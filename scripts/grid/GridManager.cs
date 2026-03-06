@@ -13,7 +13,7 @@ public partial class GridManager : Node3D
     public delegate void GridCellSelectedEventHandler(GridCell cell);
 
     [Signal]
-    public delegate void GridPathCalculatedEventHandler(GridPath path);
+    public delegate void GridPathConfirmedEventHandler(GridPath path, GridCell targetCell);
 
     [Export]
     public float CellSize { get; set; } = 1.0f;
@@ -28,7 +28,7 @@ public partial class GridManager : Node3D
 
     public GridCell SelectedCell => _selectedCell;
     public GridCell HoveredCell => _hoveredCell;
-    public GridPath SelectedPath => _worldLogic?.SelectionContext?.SelectedPath ?? GridPath.Invalid;
+    public GridPath PreviewPath { get; private set; } = GridPath.Invalid;
 
     private GridCell[,] _grid;
     private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
@@ -71,6 +71,14 @@ public partial class GridManager : Node3D
 
         _selectedCell = GetCell(coordinate);
         EmitSignal(SignalName.GridCellSelected, _selectedCell);
+
+        if (PreviewPath.PathIsValid && _selectedCell != null && PreviewPath.End == _selectedCell.Coordinate)
+        {
+            EmitSignal(SignalName.GridPathConfirmed, PreviewPath, _selectedCell);
+            return;
+        }
+
+        EmitSignal(SignalName.GridPathConfirmed, GridPath.Invalid, _selectedCell);
     }
 
     public void SetHoveredCell(Vector2I? coordinate)
@@ -78,21 +86,20 @@ public partial class GridManager : Node3D
         if (!CanSelectGrid)
         {
             _hoveredCell = null;
+            PreviewPath = GridPath.Invalid;
             return;
         }
 
         _hoveredCell = coordinate.HasValue ? GetCell(coordinate.Value) : null;
 
-        // if (_worldLogic?.SelectionContext == null)
-        //     return;
-        //
-        // if (_worldLogic.SelectionContext is { IsActive: true, SourcePawn: not null } && _hoveredCell != null)
-        // {
-        //     _worldLogic.SelectionContext.SelectedPath = FindPath(_worldLogic.SelectionContext.SourcePawn.OccupiedCell, _hoveredCell);
-        //     return;
-        // }
-        //
-        // _worldLogic.SelectionContext.SelectedPath = GridPath.Invalid;
+        if (_worldLogic?.SelectionContext is { AbilityBeingResolved: true, SourcePawn: not null } && _hoveredCell != null)
+        {
+            PreviewPath = FindPath(_worldLogic.SelectionContext.SourcePawn.OccupiedCell, _hoveredCell);
+        }
+        else
+        {
+            PreviewPath = GridPath.Invalid;
+        }
     }
 
     public GridCell AddPawn(GridPawn pawn)
@@ -129,18 +136,31 @@ public partial class GridManager : Node3D
     public GridPath FindPath(GridCell startCell, GridCell endCell)
     {
         if (startCell == null || endCell == null)
-            return GridPath.Invalid;
+        {
+            PreviewPath = GridPath.Invalid;
+            return PreviewPath;
+        }
 
         if (startCell.Coordinate == endCell.Coordinate)
-            return new GridPath(true, startCell.Coordinate, endCell.Coordinate, [], [], 0);
+        {
+            PreviewPath = new GridPath(true, startCell.Coordinate, endCell.Coordinate, [], [], 0);
+            return PreviewPath;
+        }
 
         if (IsCellOccupied(endCell.Coordinate))
-            return new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], [], 0);
+        {
+            PreviewPath = new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], [], 0);
+            return PreviewPath;
+        }
 
-        var path = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
-        EmitSignal(SignalName.GridPathCalculated, path);
+        PreviewPath = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate);
 
-        return path;
+        return PreviewPath;
+    }
+
+    public void ClearPreviewPath()
+    {
+        PreviewPath = GridPath.Invalid;
     }
     
     #region Helpers

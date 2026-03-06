@@ -74,10 +74,10 @@ public partial class PawnManager : Node3D
     {
         _selectedAbility = ability;
 
-        EmitSignal(SignalName.AbilitySelected);
+        EmitSignal(SignalName.AbilitySelected, ability);
     }
 
-    public void ResolveAbility(GridPawn targetPawn, GridCell targetCell)
+    public void ResolveAbility(GridPawn targetPawn, GridCell targetCell, GridPath confirmedPath = null)
     {
         if (_selectedAbility == null || _selectedPawn == null || _worldLogic == null || _gridManager == null)
             return;
@@ -90,7 +90,8 @@ public partial class PawnManager : Node3D
             _gridManager,
             _selectedPawn,
             targetPawn,
-            targetCell);
+            targetCell,
+            confirmedPath ?? GridPath.Invalid);
 
         if (!_selectedAbility.CanExecute(context))
         {

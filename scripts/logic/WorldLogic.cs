@@ -29,7 +29,7 @@ public partial class WorldLogic : Node3D
         }
         _gridManager = gridManager;
         _gridManager.GridCellSelected += OnGridCellSelected;
-        _gridManager.GridPathCalculated += OnGridPathCalculated;
+        _gridManager.GridPathConfirmed += OnGridPathConfirmed;
 
         var pawnManager = GetNode<PawnManager>("PawnManager");
         if (pawnManager == null)
@@ -43,16 +43,24 @@ public partial class WorldLogic : Node3D
         _pawnManager.AbilitySelected += OnPawnAbilitySelected;
     }
 
-    private void OnGridPathCalculated(GridPath path)
-    {
-        GD.Print($"[WORLD-LOGIC] Path calculated: {path}");
-        SelectionContext.GridPathSelected(path);
-    }
-
     private void OnGridCellSelected(GridCell cell)
     {
         GD.Print($"[WORLD-LOGIC] Cell selected: {cell.Coordinate}");
         SelectionContext.GridCellSelected(cell);
+    }
+
+    private void OnGridPathConfirmed(GridPath path, GridCell targetCell)
+    {
+        GD.Print($"[WORLD-LOGIC] Path confirmed: {path.Start} -> {path.End}");
+
+        if (SelectionContext is not { AbilityBeingResolved: true })
+            return;
+
+        if (!path.PathIsValid)
+            return;
+
+        SelectionContext.ConfirmPath(path);
+        _pawnManager.ResolveAbility(null, targetCell, path);
     }
 
     private void OnPawnSelected(GridPawn pawn)
@@ -63,14 +71,16 @@ public partial class WorldLogic : Node3D
 
     private void OnPawnAbilitySelected(PawnAbility ability)
     {
-        GD.Print($"[WORLD-LOGIC] Pawn ability selected: {ability.AbilityName}");
+        GD.Print($"[WORLD-LOGIC] Pawn ability selected: {ability?.AbilityName ?? "None"}");
         SelectionContext.AbilitySelected(ability);
+        _gridManager?.ClearPreviewPath();
     }
 
     private void OnPawnAbilityResolutionStarted()
     {
         GD.Print("[WORLD-LOGIC] Pawn ability resolution started");
         SelectionContext.DisableSelection();
+        _gridManager?.ClearPreviewPath();
     }
 
     public override void _UnhandledInput(InputEvent @event)
@@ -83,42 +93,5 @@ public partial class WorldLogic : Node3D
             }
         }
         base._UnhandledInput(@event);
-    }
-
-    // public void UpdateTargetingContext(PawnAbility ability)
-    // {
-    //     SelectionContext ??= new SelectionContext();
-    //
-    //     UpdateSelectionState(ability.Target);
-    //
-    //     SelectionContext.IsActive = true;
-    //     SelectionContext.PawnAbility = ability;
-    //     SelectionContext.SourcePawn = ability.Pawn;
-    //     SelectionContext.HoveredCell = null;
-    //     SelectionContext.SelectedCell = null;
-    //     SelectionContext.PreviewPath = GridPath.Invalid;
-    // }
-
-    // public void ClearTargetingContext()
-    // {
-    //     SelectionContext ??= new SelectionContext();
-    //     SelectionContext.Clear();
-    // }
-    
-    public void GridCellSelected(GridCell cell)
-    {
-        if (SelectionContext is { AbilityBeingResolved: true })
-            _pawnManager.ResolveAbility(null, cell);
-    }
-
-    public void PawnSelected(GridPawn pawn)
-    {
-        if (!SelectionContext.CanSelectPawns)
-            return;
-
-        if (SelectionContext is { AbilityBeingResolved: true })
-            _pawnManager.ResolveAbility(pawn, null);
-        else
-            _pawnManager.SelectPawn(pawn);
     }
 }
