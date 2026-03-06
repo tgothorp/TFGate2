@@ -22,6 +22,9 @@ public abstract partial class PawnAbility : Node3D
     [Export(hintString:"Can this ability ONLY target the owner?")]
     public bool CanOnlyTargetSelf { get; set; }
 
+    [Signal]
+    public delegate void AbilityFinishedEventHandler();
+
     public PlayerPawn Pawn => _owner;
     
     private WorldLogic _worldLogic;
@@ -35,6 +38,8 @@ public abstract partial class PawnAbility : Node3D
 
     public virtual bool CanExecute(AbilityExecutionContext context)
     {
+        //TODO: Top level check for pawn team targeting validity
+        
         return Pawn.CanPerformAbility(this);
     }
 

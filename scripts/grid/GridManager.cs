@@ -117,6 +117,17 @@ public partial class GridManager : Node3D
         return _grid[cell.Value.X, cell.Value.Y];
     }
 
+    public GridCell MovePawn(GridPawn pawn, Vector2I newCoordinate)
+    {
+        _occupiedPositions[pawn] = newCoordinate;
+        if (pawn.ShouldSnapToCellCenter)
+        {
+            pawn.GlobalPosition = GridToWorld(newCoordinate);
+        }
+
+        return _grid[newCoordinate.X, newCoordinate.Y];
+    }
+
     public GridPath FindPath(GridCell startCell, GridCell endCell)
     {
         if (startCell == null || endCell == null)

@@ -6,6 +6,7 @@ namespace TFGate2.scripts.pawns.abilities;
 public partial class MoveAbility : PawnAbility
 {
     private GridPath _path;
+    private AbilityExecutionContext _context;
 
     public override bool CanExecute(AbilityExecutionContext context)
     {
@@ -34,7 +35,7 @@ public partial class MoveAbility : PawnAbility
             return false;
         }
 
-        if (_path.Cost > pawn.MoveBudget)
+        if (_path.Cost > pawn.RemainingMoveBudget)
         {
             GD.PrintErr("Path is too expensive!");
             return false;
@@ -54,10 +55,21 @@ public partial class MoveAbility : PawnAbility
         
         GD.Print($"[ABILITY] Move executed by {context.SourcePawn.Name}. Path: {_path}");
 
-        if (pawn.Mover.TryStart(_path))
+        if (pawn.Mover.TryGridMove(_path))
         {
-            pawn!.SetMoveBudget(pawn!.MoveBudget - _path.Cost);   
+            _context = context;
+            pawn.Mover.MoveFinished += OnMoveFinished;
+            pawn!.UpdateMoveBudget(-_path.Cost);
         }
+    }
+
+    private void OnMoveFinished(MoveablePawn pawn)
+    {
+        pawn.Mover.MoveFinished -= OnMoveFinished;
+        var newCell = _context.GridManager.MovePawn(pawn, _path.End);
+        pawn.SetOccupiedCell(newCell);
+
+        EmitSignal(PawnAbility.SignalName.AbilityFinished);
     }
 
     private static GridPath ResolvePath(AbilityExecutionContext context)

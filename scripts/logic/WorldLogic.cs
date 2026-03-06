@@ -58,6 +58,18 @@ public partial class WorldLogic : Node3D
         ClearTargetingContext();
     }
 
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventMouseButton mouseButton)
+        {
+            if (mouseButton.ButtonIndex == MouseButton.Right && mouseButton.Pressed)
+            {
+                // TODO: Deselect ability / pawn / cell
+            }
+        }
+        base._UnhandledInput(@event);
+    }
+
     public void UpdateSelectionState(SelectionState newState)
     {
         TargetingContext ??= new TargetingContext();
@@ -88,6 +100,17 @@ public partial class WorldLogic : Node3D
     {
         if (TargetingContext is { IsActive: true } && _pawnManager != null)
             _pawnManager.ResolveAbility(null, cell);
+    }
+
+    public void PawnSelected(GridPawn pawn)
+    {
+        if (!CanSelectPawns || _pawnManager == null)
+            return;
+
+        if (TargetingContext is { IsActive: true })
+            _pawnManager.ResolveAbility(pawn, null);
+        else
+            _pawnManager.SelectPawn(pawn);
     }
     
     public enum SelectionState

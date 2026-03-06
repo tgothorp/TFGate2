@@ -14,9 +14,16 @@ public partial class PawnMover : Node
     private GridPath _path;
     private int _index;
 
-    public void Initialize(MoveablePawn pawn) => _pawn = pawn;
+    public void Initialize(MoveablePawn pawn)
+    {
+        _pawn = pawn;
+        SetPhysicsProcess(false);
+    }
 
-    public bool TryStart(GridPath path)
+    /// <summary>
+    /// Moves a pawn along the grid following the provided path
+    /// </summary>
+    public bool TryGridMove(GridPath path)
     {
         if (IsMoving || !path.PathIsValid || path.WorldPath.Length == 0) 
             return false;
@@ -24,9 +31,11 @@ public partial class PawnMover : Node
         _path = path;
         _index = 0;
         IsMoving = true;
+        SetPhysicsProcess(true);
 
         return true;
     }
+
 
     public override void _PhysicsProcess(double delta)
     {
@@ -34,12 +43,12 @@ public partial class PawnMover : Node
             return;
 
         var target = _path.WorldPath[_index];
-        var next = _pawn.CharacterBody3D.GlobalPosition.MoveToward(target, _pawn.MoveSpeed * (float)delta);
-        _pawn.CharacterBody3D.GlobalPosition = next;
+        var next = _pawn.GlobalPosition.MoveToward(target, _pawn.MoveSpeed * (float)delta);
+        _pawn.GlobalPosition = next;
 
         if (next.DistanceTo(target) <= 0.05f)
         {
-            _pawn.CharacterBody3D.GlobalPosition = target;
+            _pawn.GlobalPosition = target;
             _index++;
             if (_index >= _path.WorldPath.Length)
             {

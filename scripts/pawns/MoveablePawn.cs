@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using TFGate2.scripts.pawns.utils;
 
@@ -14,9 +15,6 @@ public partial class MoveablePawn : GridPawn
 
     [Export(hintString: "How fast this pawn can move.")]
     public float MoveSpeed { get; set; } = 5f;
-    
-    [Export]
-    public CharacterBody3D CharacterBody3D { get; set; }
 
     public PawnMover Mover { get; private set; }
 
@@ -32,12 +30,14 @@ public partial class MoveablePawn : GridPawn
     public override void _Ready()
     {
         RemainingMoveBudget = MoveBudget;
-
         base._Ready();
     }
 
-    public void SetMoveBudget(int amount)
+    public void UpdateMoveBudget(int amount)
     {
-        RemainingMoveBudget = amount;
+        if (amount < 0)
+            RemainingMoveBudget -= Math.Abs(amount);
+        else
+            RemainingMoveBudget += amount;
     }
 }

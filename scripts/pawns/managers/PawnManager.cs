@@ -44,22 +44,6 @@ public partial class PawnManager : Node3D
         }
     }
 
-    public override void _UnhandledInput(InputEvent @event)
-    {
-        if (@event is InputEventMouseButton mouseButton)
-        {
-            if (mouseButton.ButtonIndex == MouseButton.Right && mouseButton.Pressed)
-            {
-                if (IsResolvingAbility)
-                    DeselectAbility();
-                else
-                    DeselectPawn();
-            }
-        }
-
-        base._UnhandledInput(@event);
-    }
-
     public Guid RegisterPawn(GridPawn pawn)
     {
         var pawnId = Guid.NewGuid();
@@ -70,19 +54,9 @@ public partial class PawnManager : Node3D
 
     public void SelectPawn(GridPawn pawn)
     {
-        if (!CanSelectPawns())
-            return;
-
         _uiController.UpdatePawnData();
-        
-        if (IsResolvingAbility && pawn is CharacterPawn characterPawn)
-        {
-            // We have selected a pawn as part of an action resolution
-            ResolveAbility(characterPawn, null);
-            return;
-        }
-
         _selectedPawn = pawn;
+
         GD.Print($"Selected GridPawn: {pawn}");
     }
 
@@ -92,35 +66,19 @@ public partial class PawnManager : Node3D
         _worldLogic.UpdateTargetingContext(_selectedAbility);
     }
 
-    public void ResolveAbility(CharacterPawn pawn, GridCell targetCell)
+    public void ResolveAbility(GridPawn targetPawn, GridCell targetCell)
     {
         if (_selectedAbility == null || _selectedPawn == null || _worldLogic == null || _gridManager == null)
             return;
 
-        if (pawn != null)
-        {
-            var team = pawn.Team;
-            var playerTeam = _worldLogic.PlayerTeam;
-
-            switch (_selectedAbility.Target)
-            {
-                case WorldLogic.SelectionState.EnemyPawns when team == playerTeam || team == Team.World:
-                    GD.PushWarning("Selected pawn is on the same team as the player, cannot execute ability");
-                    return;
-                case WorldLogic.SelectionState.TeamPawns when team != playerTeam || team == Team.World:
-                    GD.PushWarning("Selected pawn is NOT on the same team as the player, cannot execute ability");
-                    return;
-            }
-        }
-        
-        GD.Print($"Resolving ability '{_selectedAbility.AbilityName}' for {_selectedPawn}, (pawn = {pawn}, targetCell = {targetCell})");
+        GD.Print($"Resolving ability '{_selectedAbility.AbilityName}' for {_selectedPawn}, (pawn = {targetPawn}, targetCell = {targetCell})");
 
         var context = new AbilityExecutionContext(
             _worldLogic,
             this,
             _gridManager,
             _selectedPawn,
-            pawn,
+            targetPawn,
             targetCell);
 
         if (!_selectedAbility.CanExecute(context))
@@ -129,15 +87,16 @@ public partial class PawnManager : Node3D
             return;
         }
 
+        _selectedAbility.AbilityFinished += OnAbilityResolved;
         _selectedAbility.BeginExecute(context);
         _uiController.UpdatePawnData();
-
-        DeselectAbility();
     }
 
-    private bool CanSelectPawns()
+    private void OnAbilityResolved()
     {
-        return _worldLogic is { CanSelectPawns: true };
+        _selectedAbility.AbilityFinished -= OnAbilityResolved;
+        DeselectAbility();
+        DeselectPawn();
     }
 
     private void DeselectAbility()

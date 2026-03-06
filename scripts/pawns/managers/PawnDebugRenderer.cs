@@ -81,10 +81,10 @@ public partial class PawnDebugRenderer : Node3D
 
     private void ApplyHighlight(GridPawn pawn)
     {
-        var mesh = pawn.GetNodeOrNull<MeshInstance3D>("CharacterBody3D/MeshInstance3D");
+        var mesh = pawn.GetNodeOrNull<MeshInstance3D>("MeshInstance3D");
         if (mesh == null)
         {
-            GD.PrintErr($"Could not find CharacterBody3D for pawn '{pawn.Name}'.");
+            GD.PrintErr($"Could not find MeshInstance3D for pawn '{pawn.Name}'.");
             return;
         }
 
@@ -102,7 +102,7 @@ public partial class PawnDebugRenderer : Node3D
             if (pawn == _highlightedPawn)
                 continue;
             
-            var mesh = pawn.GetNodeOrNull<MeshInstance3D>("CharacterBody3D/MeshInstance3D");
+            var mesh = pawn.GetNodeOrNull<MeshInstance3D>("MeshInstance3D");
             if (mesh == null)
                 continue;
 

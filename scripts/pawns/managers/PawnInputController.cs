@@ -61,7 +61,7 @@ public partial class PawnInputController : Node3D
             {
                 if (currentNode is GridPawn gridPawn)
                 {
-                    _pawnManager.SelectPawn(gridPawn);
+                    _worldLogic.PawnSelected(gridPawn);
                     return;
                 }
 
