@@ -13,28 +13,11 @@ public partial class WorldLogic : Node3D
     
     [Export]
     public Team CurrentTeamTurn { get; set; } = Team.Red;
-    
-    public SelectionState CurrentSelectionState => TargetingContext?.SelectionState ?? SelectionState.AllPawns;
 
-    public bool CanSelectGrid => CurrentSelectionState == SelectionState.Grid;
-    public bool CanSelectPawns => CurrentSelectionState is SelectionState.EnemyPawns or SelectionState.TeamPawns or SelectionState.AllPawns;
-
-    public TargetingContext TargetingContext { get; set; } = null;
+    public SelectionContext SelectionContext { get; set; } = new();
 
     private GridManager _gridManager;
     private PawnManager _pawnManager;
-
-    public override void _EnterTree()
-    {
-        TargetingContext = new TargetingContext
-        {
-            IsActive = false,
-            SelectionState = SelectionState.AllPawns,
-            PreviewPath = GridPath.Invalid
-        };
-
-        base._EnterTree();
-    }
 
     public override void _Ready()
     {
@@ -44,6 +27,9 @@ public partial class WorldLogic : Node3D
             GD.PrintErr("GridManager not found!");
             return;
         }
+        _gridManager = gridManager;
+        _gridManager.GridCellSelected += OnGridCellSelected;
+        _gridManager.GridPathCalculated += OnGridPathCalculated;
 
         var pawnManager = GetNode<PawnManager>("PawnManager");
         if (pawnManager == null)
@@ -51,11 +37,40 @@ public partial class WorldLogic : Node3D
             GD.PrintErr("PawnManager not found!");
             return;
         }
-
-        _gridManager = gridManager;
         _pawnManager = pawnManager;
-        
-        ClearTargetingContext();
+        _pawnManager.PawnSelected += OnPawnSelected;
+        _pawnManager.AbilityResolving += OnPawnAbilityResolutionStarted;
+        _pawnManager.AbilitySelected += OnPawnAbilitySelected;
+    }
+
+    private void OnGridPathCalculated(GridPath path)
+    {
+        GD.Print($"[WORLD-LOGIC] Path calculated: {path}");
+        SelectionContext.GridPathSelected(path);
+    }
+
+    private void OnGridCellSelected(GridCell cell)
+    {
+        GD.Print($"[WORLD-LOGIC] Cell selected: {cell.Coordinate}");
+        SelectionContext.GridCellSelected(cell);
+    }
+
+    private void OnPawnSelected(GridPawn pawn)
+    {
+        GD.Print($"[WORLD-LOGIC] Pawn selected: {pawn.Name}");
+        SelectionContext.PawnSelected(pawn);
+    }
+
+    private void OnPawnAbilitySelected(PawnAbility ability)
+    {
+        GD.Print($"[WORLD-LOGIC] Pawn ability selected: {ability.AbilityName}");
+        SelectionContext.AbilitySelected(ability);
+    }
+
+    private void OnPawnAbilityResolutionStarted()
+    {
+        GD.Print("[WORLD-LOGIC] Pawn ability resolution started");
+        SelectionContext.DisableSelection();
     }
 
     public override void _UnhandledInput(InputEvent @event)
@@ -70,60 +85,40 @@ public partial class WorldLogic : Node3D
         base._UnhandledInput(@event);
     }
 
-    public void UpdateSelectionState(SelectionState newState)
-    {
-        TargetingContext ??= new TargetingContext();
-        TargetingContext.SelectionState = newState;
-    }
+    // public void UpdateTargetingContext(PawnAbility ability)
+    // {
+    //     SelectionContext ??= new SelectionContext();
+    //
+    //     UpdateSelectionState(ability.Target);
+    //
+    //     SelectionContext.IsActive = true;
+    //     SelectionContext.PawnAbility = ability;
+    //     SelectionContext.SourcePawn = ability.Pawn;
+    //     SelectionContext.HoveredCell = null;
+    //     SelectionContext.SelectedCell = null;
+    //     SelectionContext.PreviewPath = GridPath.Invalid;
+    // }
 
-    public void UpdateTargetingContext(PawnAbility ability)
-    {
-        TargetingContext ??= new TargetingContext();
-
-        UpdateSelectionState(ability.Target);
-
-        TargetingContext.IsActive = true;
-        TargetingContext.PawnAbility = ability;
-        TargetingContext.SourcePawn = ability.Pawn;
-        TargetingContext.HoveredCell = null;
-        TargetingContext.SelectedCell = null;
-        TargetingContext.PreviewPath = GridPath.Invalid;
-    }
-
-    public void ClearTargetingContext()
-    {
-        TargetingContext ??= new TargetingContext();
-        TargetingContext.Clear();
-    }
+    // public void ClearTargetingContext()
+    // {
+    //     SelectionContext ??= new SelectionContext();
+    //     SelectionContext.Clear();
+    // }
     
     public void GridCellSelected(GridCell cell)
     {
-        if (TargetingContext is { IsActive: true } && _pawnManager != null)
+        if (SelectionContext is { AbilityBeingResolved: true })
             _pawnManager.ResolveAbility(null, cell);
     }
 
     public void PawnSelected(GridPawn pawn)
     {
-        if (!CanSelectPawns || _pawnManager == null)
+        if (!SelectionContext.CanSelectPawns)
             return;
 
-        if (TargetingContext is { IsActive: true })
+        if (SelectionContext is { AbilityBeingResolved: true })
             _pawnManager.ResolveAbility(pawn, null);
         else
             _pawnManager.SelectPawn(pawn);
-    }
-    
-    public enum SelectionState
-    {
-        // Nothing in the world can be selected
-        Nothing,
-        
-        // Only pawns can be selected
-        EnemyPawns,
-        TeamPawns,
-        AllPawns,
-        
-        // Only the grid can be selected
-        Grid,
     }
 }

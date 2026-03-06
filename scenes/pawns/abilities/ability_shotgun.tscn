@@ -8,5 +8,5 @@ MaxEffectiveRange = 3
 MaxRange = 7
 AbilityName = "Shotgun"
 AbilityDescription = "Unload 30 pellets at your enemy"
-Target = 1
+Target = 3
 Cost = 2

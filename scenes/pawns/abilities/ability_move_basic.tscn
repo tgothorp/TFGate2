@@ -6,4 +6,3 @@
 script = ExtResource("1_4rb3h")
 AbilityName = "Move"
 AbilityDescription = "Reposition your character"
-Target = 4

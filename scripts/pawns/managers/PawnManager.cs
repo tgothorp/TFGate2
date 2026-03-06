@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using TFGate2.scripts.grid;
-using TFGate2.scripts.pawns;
 using TFGate2.scripts.pawns.abilities;
 using TFGate2.scripts.pawns.managers;
 
@@ -11,7 +10,18 @@ using TFGate2.scripts.pawns.managers;
 /// </summary>
 public partial class PawnManager : Node3D
 {
-    public bool IsResolvingAbility => _worldLogic?.TargetingContext?.IsActive ?? false;
+    [Signal]
+    public delegate void PawnSelectedEventHandler(GridPawn pawn);
+    
+    [Signal]
+    public delegate void AbilitySelectedEventHandler(PawnAbility ability);
+    
+    [Signal]
+    public delegate void AbilityResolvingEventHandler();
+
+    [Signal]
+    public delegate void AbilityResolvedEventHandler();
+
     public GridPawn SelectedPawn => _selectedPawn;
     public Dictionary<Guid, GridPawn> RegisteredPawns => _registeredPawns;
 
@@ -57,13 +67,14 @@ public partial class PawnManager : Node3D
         _uiController.UpdatePawnData();
         _selectedPawn = pawn;
 
-        GD.Print($"Selected GridPawn: {pawn}");
+        EmitSignal(SignalName.PawnSelected, pawn);
     }
 
     public void SelectAbility(PawnAbility ability)
     {
         _selectedAbility = ability;
-        _worldLogic.UpdateTargetingContext(_selectedAbility);
+
+        EmitSignal(SignalName.AbilitySelected);
     }
 
     public void ResolveAbility(GridPawn targetPawn, GridCell targetCell)
@@ -87,6 +98,7 @@ public partial class PawnManager : Node3D
             return;
         }
 
+        EmitSignal(SignalName.AbilityResolving);
         _selectedAbility.AbilityFinished += OnAbilityResolved;
         _selectedAbility.BeginExecute(context);
         _uiController.UpdatePawnData();
@@ -95,15 +107,16 @@ public partial class PawnManager : Node3D
     private void OnAbilityResolved()
     {
         _selectedAbility.AbilityFinished -= OnAbilityResolved;
+        EmitSignal(SignalName.AbilityResolved);
         DeselectAbility();
-        DeselectPawn();
     }
 
     private void DeselectAbility()
     {
         GD.Print("Deselecting ability");
         _selectedAbility = null;
-        _worldLogic.ClearTargetingContext();
+
+        EmitSignal(SignalName.AbilitySelected, null);
     }
 
     private void DeselectPawn()
@@ -112,6 +125,5 @@ public partial class PawnManager : Node3D
         _selectedPawn = null;
         _selectedAbility = null;
         _uiController.UpdatePawnData();
-        _worldLogic.ClearTargetingContext();
     }
 }

@@ -11,7 +11,7 @@ public abstract partial class PawnAbility : Node3D
     public string AbilityDescription { get; set; }
 
     [Export]
-    public WorldLogic.SelectionState Target { get; set; }
+    public AbilityTarget Target { get; set; }
 
     [Export]
     public AbilityCost Cost { get; set; }
@@ -45,12 +45,7 @@ public abstract partial class PawnAbility : Node3D
 
     public void BeginExecute(AbilityExecutionContext context)
     {
-        var oldState = context.WorldLogic.CurrentSelectionState;
-        context.WorldLogic.UpdateSelectionState(WorldLogic.SelectionState.Nothing);
-        
         Execute(context);
-
-        context.WorldLogic.UpdateSelectionState(oldState);
     }
     
     public virtual void Execute(AbilityExecutionContext context)
@@ -80,6 +75,15 @@ public abstract partial class PawnAbility : Node3D
         BonusAction,
         Reaction,
         Special,
+    }
+    
+    public enum AbilityTarget
+    {
+        Grid,
+        Self,
+        Team,
+        Opponent,
+        All,
     }
 }
 

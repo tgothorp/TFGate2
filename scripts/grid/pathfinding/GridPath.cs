@@ -5,7 +5,7 @@ namespace TFGate2.scripts.grid;
 /// <summary>
 /// Represents a path through the grid.
 /// </summary>
-public readonly struct GridPath
+public partial class GridPath : Node
 {
     public bool PathIsValid { get; }
     public Vector2I Start { get; }
@@ -13,6 +13,8 @@ public readonly struct GridPath
     public Vector2I[] CellPath { get; }
     public Vector3[] WorldPath { get; }
     public int Cost { get; }
+
+    public GridPath() {}
 
     public GridPath(bool pathIsValid,
         Vector2I start,

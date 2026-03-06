@@ -125,7 +125,7 @@ public partial class PawnUiController : Control
         if (pawn == null || ability == null)
             return;
 
-        GD.Print($"[UI] Ability selected - Pawn: {pawn.Name}, Ability: {ability.AbilityName}, Index: {abilityIndex}");
+        GD.Print($"[PAWN-UI] Ability selected - Pawn: {pawn.Name}, Ability: {ability.AbilityName}, Index: {abilityIndex}");
         _pawnManager.SelectAbility(ability);
     }
 }

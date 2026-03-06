@@ -2,8 +2,10 @@ using Godot;
 
 namespace TFGate2.scripts.grid;
 
-public sealed class GridCell
+public partial class GridCell : Node
 {
+    public GridCell() { }
+    
     public GridCell(Vector2I coordinate, Vector3 worldPosition)
     {
         Coordinate = coordinate;

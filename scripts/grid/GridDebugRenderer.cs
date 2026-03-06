@@ -142,10 +142,10 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdatePathHighlight()
     {
-        if (_gridManager == null || _worldLogic?.TargetingContext == null)
+        if (_gridManager == null || _worldLogic?.SelectionContext == null)
             return;
 
-        var path = _worldLogic.TargetingContext.PreviewPath;
+        var path = _worldLogic.SelectionContext.SelectedPath;
         if (!path.PathIsValid || path.CellPath.Length == 0)
         {
             HideAllPathHighlights();
@@ -323,14 +323,14 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdateSelectionHighlight()
     {
-        if (!_showSelection || _selectionHighlight == null || _worldLogic?.TargetingContext == null || !_worldLogic.CanSelectGrid)
+        if (!_showSelection || _selectionHighlight == null || _worldLogic?.SelectionContext is not { CanSelectGrid: true })
         {
             if (_selectionHighlight != null)
                 _selectionHighlight.Visible = false;
             return;
         }
 
-        var selectedCell = _worldLogic.TargetingContext.SelectedCell;
+        var selectedCell = _worldLogic.SelectionContext.SelectedCell;
         if (selectedCell != null)
         {
             var grid = GetParent<GridManager>();
@@ -356,14 +356,14 @@ public partial class GridDebugRenderer : Node3D
     
     private void UpdateHoverHighlight()
     {
-        if (!_showSelection || _hoverHighlight == null || _worldLogic?.TargetingContext == null || !_worldLogic.CanSelectGrid)
+        if (!_showSelection || _hoverHighlight == null || _worldLogic?.SelectionContext is not { CanSelectGrid: true })
         {
             if (_hoverHighlight != null)
                 _hoverHighlight.Visible = false;
             return;
         }
 
-        var hoveredCell = _worldLogic.TargetingContext.HoveredCell;
+        var hoveredCell = _worldLogic.SelectionContext.HoveredCell;
         if (hoveredCell == null)
         {
             _hoverHighlight.Visible = false;

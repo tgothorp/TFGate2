@@ -5,4 +5,5 @@
 [node name="AbilityNothing" type="Node3D" unique_id=673137501]
 script = ExtResource("1_1kjbs")
 AbilityName = "Nothing"
+Target = 1
 Cost = 1

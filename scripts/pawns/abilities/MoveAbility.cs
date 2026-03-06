@@ -74,10 +74,10 @@ public partial class MoveAbility : PawnAbility
 
     private static GridPath ResolvePath(AbilityExecutionContext context)
     {
-        var targetingContext = context.WorldLogic.TargetingContext;
-        if (targetingContext != null && targetingContext.PreviewPath.PathIsValid)
+        var targetingContext = context.WorldLogic.SelectionContext;
+        if (targetingContext != null && targetingContext.SelectedPath.PathIsValid)
         {
-            var previewPath = targetingContext.PreviewPath;
+            var previewPath = targetingContext.SelectedPath;
             var sourceCoordinate = context.SourcePawn.OccupiedCell.Coordinate;
             var targetCoordinate = context.TargetCell.Coordinate;
 
