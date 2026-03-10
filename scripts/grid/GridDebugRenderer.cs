@@ -136,6 +136,7 @@ public partial class GridDebugRenderer : Node3D
     private MeshInstance3D _hoverHighlight;
     private readonly List<MeshInstance3D> _pathHighlights = [];
     private GridManager _gridManager;
+    private GridTargetingController _gridTargetingController;
     private WorldLogic _worldLogic;
 
     public override void _Ready()
@@ -157,7 +158,7 @@ public partial class GridDebugRenderer : Node3D
         if (_gridManager == null)
             return;
 
-        var path = _gridManager.PreviewPath;
+        var path = _gridTargetingController?.PreviewPath ?? GridPath.Invalid;
         if (!path.PathIsValid || path.CellPath.Length == 0)
         {
             HideAllPathHighlights();
@@ -193,6 +194,7 @@ public partial class GridDebugRenderer : Node3D
     private void EnsureNodes()
     {
         _gridManager ??= GetParent<GridManager>();
+        _gridTargetingController ??= _gridManager?.GetNodeOrNull<GridTargetingController>("GridTargetingController");
         if (_worldLogic == null && _gridManager != null)
         {
             _worldLogic = _gridManager.GetParent() as WorldLogic;
@@ -339,14 +341,14 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdateSelectionHighlight()
     {
-        if (!_showSelection || _selectionHighlight == null || _worldLogic?.SelectionContext is not { CanSelectGrid: true })
+        if (!_showSelection || _selectionHighlight == null || _gridTargetingController is not { CanSelectGrid: true })
         {
             if (_selectionHighlight != null)
                 _selectionHighlight.Visible = false;
             return;
         }
 
-        var selectedCell = _worldLogic.SelectionContext.SelectedCell;
+        var selectedCell = _gridTargetingController.SelectedCell;
         if (selectedCell != null)
         {
             var grid = GetParent<GridManager>();
@@ -372,14 +374,14 @@ public partial class GridDebugRenderer : Node3D
     
     private void UpdateHoverHighlight()
     {
-        if (!_showSelection || _hoverHighlight == null || _gridManager is not { CanSelectGrid: true })
+        if (!_showSelection || _hoverHighlight == null || _gridTargetingController is not { CanSelectGrid: true })
         {
             if (_hoverHighlight != null)
                 _hoverHighlight.Visible = false;
             return;
         }
 
-        var hoveredCell = _gridManager.HoveredCell;
+        var hoveredCell = _gridTargetingController.HoveredCell;
         if (hoveredCell == null)
         {
             _hoverHighlight.Visible = false;
@@ -433,7 +435,7 @@ public partial class GridDebugRenderer : Node3D
 
     private void UpdatePathMaterials()
     {
-        var path = _gridManager?.PreviewPath;
+        var path = _gridTargetingController?.PreviewPath;
         var activeColor = path != null && path.ExceedsBudget ? _overBudgetPathColor : _pathColor;
 
         for (var i = 0; i < _pathHighlights.Count; i++)

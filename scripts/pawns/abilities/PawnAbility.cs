@@ -1,4 +1,5 @@
 using Godot;
+using TFGate2.scripts.pawns;
 
 namespace TFGate2.scripts.pawns.abilities;
 
@@ -25,12 +26,12 @@ public abstract partial class PawnAbility : Node3D
     [Signal]
     public delegate void AbilityFinishedEventHandler();
 
-    public PlayerPawn Pawn => _owner;
+    public CombatPawn Pawn => _owner;
     
     private WorldLogic _worldLogic;
-    private PlayerPawn _owner;
+    private CombatPawn _owner;
     
-    public void Register(WorldLogic worldLogic, PlayerPawn owner)
+    public void Register(WorldLogic worldLogic, CombatPawn owner)
     {
         _worldLogic = worldLogic;
         _owner = owner;
@@ -38,7 +39,14 @@ public abstract partial class PawnAbility : Node3D
 
     public virtual bool CanExecute(AbilityExecutionContext context)
     {
-        //TODO: Top level check for pawn team targeting validity
+        if (context.SourcePawn == null || context.Command.Ability != this)
+            return false;
+
+        if (context.SourcePawn != Pawn)
+            return false;
+
+        if (!ValidateTargeting(context))
+            return false;
         
         return Pawn.CanPerformAbility(this);
     }
@@ -85,5 +93,39 @@ public abstract partial class PawnAbility : Node3D
         Opponent,
         All,
     }
-}
 
+    private bool ValidateTargeting(AbilityExecutionContext context)
+    {
+        switch (Target)
+        {
+            case AbilityTarget.Grid:
+                return context.TargetCell != null;
+            case AbilityTarget.Self:
+                return context.TargetPawn == context.SourcePawn || (CanOnlyTargetSelf && context.TargetPawn == null);
+            case AbilityTarget.Team:
+                return ValidatePawnTarget(context, sameTeam: true);
+            case AbilityTarget.Opponent:
+                return ValidatePawnTarget(context, sameTeam: false);
+            case AbilityTarget.All:
+                return context.TargetPawn != null || context.TargetCell != null || context.SourcePawn != null;
+            default:
+                return false;
+        }
+    }
+
+    private bool ValidatePawnTarget(AbilityExecutionContext context, bool sameTeam)
+    {
+        if (context.TargetPawn is not CharacterPawn targetCharacter || context.SourcePawn is not CharacterPawn sourceCharacter)
+            return false;
+
+        if (CanOnlyTargetSelf)
+            return ReferenceEquals(context.TargetPawn, context.SourcePawn);
+
+        if (!CanTargetSelf && ReferenceEquals(context.TargetPawn, context.SourcePawn))
+            return false;
+
+        return sameTeam
+            ? targetCharacter.Team == sourceCharacter.Team
+            : targetCharacter.Team != sourceCharacter.Team;
+    }
+}

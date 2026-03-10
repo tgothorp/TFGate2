@@ -1,4 +1,5 @@
 using TFGate2.scripts.grid;
+using TFGate2.scripts.logic.actions;
 
 namespace TFGate2.scripts.pawns.abilities;
 
@@ -12,25 +13,20 @@ public readonly struct AbilityExecutionContext
         WorldLogic worldLogic,
         PawnManager pawnManager,
         GridManager gridManager,
-        GridPawn sourcePawn,
-        GridPawn targetPawn,
-        GridCell targetCell,
-        GridPath confirmedPath)
+        PawnActionCommand command)
     {
         WorldLogic = worldLogic;
         PawnManager = pawnManager;
         GridManager = gridManager;
-        SourcePawn = sourcePawn;
-        TargetPawn = targetPawn;
-        TargetCell = targetCell;
-        ConfirmedPath = confirmedPath;
+        Command = command;
     }
 
     public WorldLogic WorldLogic { get; }
     public PawnManager PawnManager { get; }
     public GridManager GridManager { get; }
-    public GridPawn SourcePawn { get; }
-    public GridPawn TargetPawn { get; }
-    public GridCell TargetCell { get; }
-    public GridPath ConfirmedPath { get; }
+    public PawnActionCommand Command { get; }
+    public GridPawn SourcePawn => Command.SourcePawn;
+    public GridPawn TargetPawn => Command.TargetPawn;
+    public GridCell TargetCell => Command.TargetCell;
+    public GridPath ConfirmedPath => Command.ConfirmedPath;
 }

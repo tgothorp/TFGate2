@@ -1,26 +1,21 @@
 using System;
-using TFGate2.scripts.grid;
 using TFGate2.scripts.pawns.abilities;
 
 namespace TFGate2.scripts.logic;
 
 /// <summary>
-/// Represents what is currently selected and what can be selected
+/// Represents the player's in-progress targeting workflow.
 /// </summary>
-public class SelectionContext
+public class PlayerTargetingContext
 {
-    public SelectionContext()
+    public PlayerTargetingContext()
     {
         Clear();
     }
 
-    public bool AbilityBeingResolved { get; private set; }
-
-    public PawnAbility PawnAbility { get; private set; }
+    public bool HasActiveAbility => SelectedAbility != null;
+    public PawnAbility SelectedAbility { get; private set; }
     public GridPawn SourcePawn { get; private set; }
-
-    public GridCell SelectedCell { get; private set; }
-    public GridPath ConfirmedPath { get; private set; }
 
     public SelectionState ActiveSelectionState { get; set; }
 
@@ -29,22 +24,9 @@ public class SelectionContext
 
     public void Clear()
     {
-        PawnAbility = null;
+        SelectedAbility = null;
         SourcePawn = null;
-        SelectedCell = null;
-        ConfirmedPath = GridPath.Invalid;
-        AbilityBeingResolved = false;
         ActiveSelectionState = SelectionState.AllPawns;
-    }
-
-    public void GridCellSelected(GridCell cell)
-    {
-        SelectedCell = cell;
-    }
-
-    public void ConfirmPath(GridPath path)
-    {
-        ConfirmedPath = path ?? GridPath.Invalid;
     }
 
     public void PawnSelected(GridPawn pawn)
@@ -52,16 +34,17 @@ public class SelectionContext
         SourcePawn = pawn;
     }
 
-    public void AbilitySelected(PawnAbility pawnAbility)
+    public void AbilitySelected(PawnAbility ability)
     {
-        AbilityBeingResolved = pawnAbility != null;
-        PawnAbility = pawnAbility;
-        ConfirmedPath = GridPath.Invalid;
+        SelectedAbility = ability;
 
-        if (pawnAbility == null)
+        if (ability == null)
+        {
+            ActiveSelectionState = SelectionState.AllPawns;
             return;
+        }
 
-        switch (pawnAbility.Target)
+        switch (ability.Target)
         {
             case PawnAbility.AbilityTarget.Grid:
                 ActiveSelectionState = SelectionState.Grid;
@@ -87,9 +70,15 @@ public class SelectionContext
         ActiveSelectionState = newState;
     }
     
-    public void DisableSelection()
+    public void BeginExecutionLock()
     {
         ActiveSelectionState = SelectionState.Nothing;
+    }
+
+    public void CompleteAbilitySelection()
+    {
+        SelectedAbility = null;
+        ActiveSelectionState = SelectionState.AllPawns;
     }
 
     public enum SelectionState

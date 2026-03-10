@@ -5,6 +5,7 @@ namespace TFGate2.scripts.grid;
 public partial class GridInputController : Node3D
 {
     private GridManager _gridManager;
+    private GridTargetingController _gridTargetingController;
     private Camera3D _camera;
 
     public override void _Ready()
@@ -14,6 +15,12 @@ public partial class GridInputController : Node3D
         if (_gridManager == null)
         {
             GD.PrintErr("GridInputController must be a child of GridManager!");
+        }
+
+        _gridTargetingController = _gridManager?.GetNodeOrNull<GridTargetingController>("GridTargetingController");
+        if (_gridTargetingController == null)
+        {
+            GD.PrintErr("GridTargetingController not found!");
         }
     }
     
@@ -38,24 +45,24 @@ public partial class GridInputController : Node3D
         if (!TryGetGridCoordAtMouse(mousePosition, out var gridCoord))
             return;
 
-        _gridManager.SelectCell(gridCoord);
+        _gridTargetingController?.SelectCell(gridCoord);
     }
 
     private void HandleHover(Vector2 mousePosition)
     {
-        if (!_gridManager.CanSelectGrid)
+        if (_gridTargetingController == null || !_gridTargetingController.CanSelectGrid)
         {
-            _gridManager.SetHoveredCell(null);
+            _gridTargetingController?.SetHoveredCell(null);
             return;
         }
 
         if (!TryGetGridCoordAtMouse(mousePosition, out var gridCoord))
         {
-            _gridManager.SetHoveredCell(null);
+            _gridTargetingController.SetHoveredCell(null);
             return;
         }
 
-        _gridManager.SetHoveredCell(gridCoord);
+        _gridTargetingController.SetHoveredCell(gridCoord);
     }
 
     private bool TryGetGridCoordAtMouse(Vector2 mousePosition, out Vector2I gridCoord)

@@ -25,7 +25,10 @@ public partial class PawnInputController : Node3D
     {
         if (@event is InputEventMouseButton mouseButton)
         {
-            if (mouseButton.ButtonIndex == MouseButton.Left && mouseButton.Pressed && _worldLogic.SelectionContext.CanSelectPawns)
+            if (mouseButton.ButtonIndex == MouseButton.Left &&
+                mouseButton.Pressed &&
+                _worldLogic.IsPlayerInputAllowed &&
+                _worldLogic.PlayerTargetingContext.CanSelectPawns)
             {
                 HandleClick(mouseButton.Position);
             }
@@ -34,7 +37,7 @@ public partial class PawnInputController : Node3D
 
     private void HandleClick(Vector2 mousePosition)
     {
-        if (_worldLogic == null || !_worldLogic.SelectionContext.CanSelectPawns)
+        if (_worldLogic == null || !_worldLogic.IsPlayerInputAllowed || !_worldLogic.PlayerTargetingContext.CanSelectPawns)
             return;
 
         var camera = GetViewport().GetCamera3D();

@@ -512,3 +512,9 @@ fabric.properties
 
 .dotnet
 .dotnet/
+.idea
+.idea/
+.agent
+.agent/
+.agents
+.agents/

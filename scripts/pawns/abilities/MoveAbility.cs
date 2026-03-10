@@ -22,7 +22,7 @@ public partial class MoveAbility : PawnAbility
             return false;
         }
 
-        if (pawn.OccupiedCell == null || pawn is { MoveBudget: <= 0 })
+        if (pawn.OccupiedCell == null || pawn.RemainingMoveBudget <= 0)
         {
             GD.PrintErr("Pawn cannot move!");
             return false;

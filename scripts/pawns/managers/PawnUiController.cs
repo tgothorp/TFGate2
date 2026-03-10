@@ -1,4 +1,5 @@
 using Godot;
+using TFGate2.scripts.pawns;
 using TFGate2.scripts.pawns.abilities;
 
 namespace TFGate2.scripts.pawns.managers;
@@ -64,13 +65,13 @@ public partial class PawnUiController : Control
             child.QueueFree();
         }
 
-        if (_pawnManager.SelectedPawn is PlayerPawn playerPawn)
+        if (_pawnManager.SelectedPawn is CombatPawn combatPawn)
         {
-            DisplayDataForPawn(playerPawn);
+            DisplayDataForPawn(combatPawn);
             
-            if (playerPawn.Team == _worldLogic.PlayerTeam)
+            if (combatPawn.Team == _worldLogic.PlayerTeam)
             {
-                DisplayAbilitiesForPawn(playerPawn);
+                DisplayAbilitiesForPawn(combatPawn);
             }
         }
 
@@ -83,16 +84,16 @@ public partial class PawnUiController : Control
         _shouldRedraw = true;
     }
 
-    private void DisplayDataForPawn(PlayerPawn playerPawn)
+    private void DisplayDataForPawn(CombatPawn combatPawn)
     {
-        var idLabel = new Label { Text = $"ID: {playerPawn.PawnId}" };
-        var teamLabel = new Label { Text = $"Team: {playerPawn.Team.ToString()}" };
-        var hpLabel = new Label { Text = $"HP: {playerPawn.CurrentHitPoints.ToString()} / {playerPawn.HitPoints.ToString()}" };
-        var moveBudgetLabel = new Label { Text = $"Move Budget: {playerPawn.MoveBudget}" };
-        var remainingMoveBudgetLabel = new Label { Text = $"Remaining Move Budget: {playerPawn.RemainingMoveBudget}" };
-        var actionLabel = new Label { Text = $"Has Taken Action: {playerPawn.HasTakenAction.ToString()}" };
-        var bonusActionLabel = new Label { Text = $"Has Taken Bonus Action: {playerPawn.HasTakenBonusAction.ToString()}" };
-        var reactionLabel = new Label { Text = $"Has Taken Reaction: {playerPawn.HasTakenReaction.ToString()}" };
+        var idLabel = new Label { Text = $"ID: {combatPawn.PawnId}" };
+        var teamLabel = new Label { Text = $"Team: {combatPawn.Team.ToString()}" };
+        var hpLabel = new Label { Text = $"HP: {combatPawn.CurrentHitPoints.ToString()} / {combatPawn.HitPoints.ToString()}" };
+        var moveBudgetLabel = new Label { Text = $"Move Budget: {combatPawn.MoveBudget}" };
+        var remainingMoveBudgetLabel = new Label { Text = $"Remaining Move Budget: {combatPawn.RemainingMoveBudget}" };
+        var actionLabel = new Label { Text = $"Has Taken Action: {combatPawn.HasTakenAction.ToString()}" };
+        var bonusActionLabel = new Label { Text = $"Has Taken Bonus Action: {combatPawn.HasTakenBonusAction.ToString()}" };
+        var reactionLabel = new Label { Text = $"Has Taken Reaction: {combatPawn.HasTakenReaction.ToString()}" };
         
         _dataContainer.AddChild(idLabel);
         _dataContainer.AddChild(teamLabel);
@@ -104,9 +105,9 @@ public partial class PawnUiController : Control
         _dataContainer.AddChild(reactionLabel);
     }
     
-    private void DisplayAbilitiesForPawn(PlayerPawn playerPawn)
+    private void DisplayAbilitiesForPawn(CombatPawn combatPawn)
     {
-        var abilities = playerPawn.GetAbilities(null);
+        var abilities = combatPawn.GetAbilities();
         for (var i = 0; i < abilities.Count; i++)
         {
             var ability = abilities[i];

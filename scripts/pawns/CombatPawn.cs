@@ -7,9 +7,9 @@ using TFGate2.scripts.pawns.abilities;
 namespace TFGate2.scripts.pawns;
 
 /// <summary>
-/// Represents a player-controlled pawn with abilities
+/// Represents a combat-capable pawn with abilities and turn resources.
 /// </summary>
-public partial class PlayerPawn : CharacterPawn
+public partial class CombatPawn : CharacterPawn
 {
     [Export]
     public CharacterClass Class { get; set; }
@@ -27,11 +27,25 @@ public partial class PlayerPawn : CharacterPawn
     public bool HasTakenReaction { get; set; }
     
     private List<PawnAbility> _pawnAbilities = [];
-    
-    public List<PawnAbility> GetAbilities(WorldLogic worldLogic)
+    private bool _abilitiesInitialized;
+
+    public override void _Ready()
     {
-        if (_pawnAbilities.Count > 0)
-            return _pawnAbilities;
+        base._Ready();
+        InitializeAbilities();
+    }
+
+    public void InitializeAbilities()
+    {
+        if (_abilitiesInitialized)
+            return;
+
+        var worldLogic = GetTree().CurrentScene?.GetNodeOrNull<WorldLogic>("WorldManager");
+        if (worldLogic == null)
+        {
+            GD.PrintErr($"[PAWN] Could not initialize abilities for {Name}: WorldManager not found.");
+            return;
+        }
 
         var abilities = GetNode("Abilities").GetChildren();
         foreach (var ability in abilities)
@@ -44,7 +58,12 @@ public partial class PlayerPawn : CharacterPawn
                 _pawnAbilities.Add(abilityNode);
             }
         }
+        
+        _abilitiesInitialized = true;
+    }
 
+    public List<PawnAbility> GetAbilities()
+    {
         return _pawnAbilities;
     }
     
@@ -66,6 +85,24 @@ public partial class PlayerPawn : CharacterPawn
             default:
                 return false;
         }
+    }
+
+    public bool OwnsAbility(PawnAbility ability)
+    {
+        return ability != null && _pawnAbilities.Contains(ability);
+    }
+
+    public override void BeginTurn()
+    {
+        base.BeginTurn();
+        ResetTurnResources();
+    }
+
+    public void ResetTurnResources()
+    {
+        HasTakenAction = false;
+        HasTakenBonusAction = false;
+        HasTakenReaction = false;
     }
     
     public override string ToString()

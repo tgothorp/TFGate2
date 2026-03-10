@@ -18,6 +18,9 @@ public partial class ShootHitscanAbility : PawnAbility
         if (!base.CanExecute(context))
             return false;
 
+        if (context.TargetPawn == null)
+            return false;
+
         var spaceState = GetWorld3D().DirectSpaceState;
         var source = Pawn.GetCenterMass();
         var target = context.TargetPawn.GetCenterMass();

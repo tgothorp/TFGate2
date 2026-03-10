@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bjd1cru3c2g5k" path="res://scripts/grid/GridManager.cs" id="1_do16o"]
 [ext_resource type="Script" uid="uid://cbd28ffi44gyc" path="res://scripts/grid/GridDebugRenderer.cs" id="2_e8itd"]
 [ext_resource type="Script" uid="uid://dvsn8mapwa63s" path="res://scripts/grid/GridInputController.cs" id="3_2iype"]
+[ext_resource type="Script" path="res://scripts/grid/GridTargetingController.cs" id="4_target"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e8itd"]
 shading_mode = 0
@@ -34,3 +35,6 @@ shape = SubResource("BoxShape3D_w7865")
 
 [node name="GridInputController" type="Node3D" parent="." unique_id=2039915090]
 script = ExtResource("3_2iype")
+
+[node name="GridTargetingController" type="Node3D" parent="." unique_id=1465449872]
+script = ExtResource("4_target")

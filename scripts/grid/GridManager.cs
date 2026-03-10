@@ -10,12 +10,6 @@ namespace TFGate2.scripts.grid;
 /// </summary>
 public partial class GridManager : Node3D
 {
-    [Signal]
-    public delegate void GridCellSelectedEventHandler(GridCell cell);
-
-    [Signal]
-    public delegate void GridPathConfirmedEventHandler(GridPath path, GridCell targetCell);
-
     [Export]
     public float CellSize { get; set; } = 1.0f;
 
@@ -25,28 +19,12 @@ public partial class GridManager : Node3D
     [Export]
     public int Height { get; set; } = 20;
 
-    public bool CanSelectGrid => _worldLogic != null && _worldLogic.SelectionContext.CanSelectGrid;
-
-    public GridCell SelectedCell => _selectedCell;
-    public GridCell HoveredCell => _hoveredCell;
-    public GridPath PreviewPath { get; private set; } = GridPath.Invalid;
-
     private GridCell[,] _grid;
     private Dictionary<GridPawn, Vector2I> _occupiedPositions = new();
-    private GridCell _selectedCell;
-    private GridCell _hoveredCell;
-    
-    private WorldLogic _worldLogic;
 
     public override void _Ready()
     {
         BuildGrid();
-
-        _worldLogic = GetParent<WorldLogic>();
-        if (_worldLogic == null)
-        {
-            GD.PrintErr("WorldLogic not found!");
-        }
     }
 
     private void BuildGrid()
@@ -62,44 +40,6 @@ public partial class GridManager : Node3D
 
                 _grid[x, z] = new GridCell(gridCoordinate, worldPosition);
             }
-        }
-    }
-
-    public void SelectCell(Vector2I coordinate)
-    {
-        if (!CanSelectGrid)
-            return;
-
-        _selectedCell = GetCell(coordinate);
-        EmitSignal(SignalName.GridCellSelected, _selectedCell);
-
-        if (PreviewPath.PathIsValid && _selectedCell != null && PreviewPath.End == _selectedCell.Coordinate)
-        {
-            EmitSignal(SignalName.GridPathConfirmed, PreviewPath, _selectedCell);
-            return;
-        }
-
-        EmitSignal(SignalName.GridPathConfirmed, GridPath.Invalid, _selectedCell);
-    }
-
-    public void SetHoveredCell(Vector2I? coordinate)
-    {
-        if (!CanSelectGrid)
-        {
-            _hoveredCell = null;
-            PreviewPath = GridPath.Invalid;
-            return;
-        }
-
-        _hoveredCell = coordinate.HasValue ? GetCell(coordinate.Value) : null;
-
-        if (_worldLogic?.SelectionContext is { AbilityBeingResolved: true, SourcePawn: not null } && _hoveredCell != null)
-        {
-            PreviewPath = FindPath(_worldLogic.SelectionContext.SourcePawn.OccupiedCell, _hoveredCell);
-        }
-        else
-        {
-            PreviewPath = GridPath.Invalid;
         }
     }
 
@@ -134,38 +74,18 @@ public partial class GridManager : Node3D
         return _grid[newCoordinate.X, newCoordinate.Y];
     }
 
-    public GridPath FindPath(GridCell startCell, GridCell endCell)
+    public GridPath FindPath(GridCell startCell, GridCell endCell, int budget = -1)
     {
         if (startCell == null || endCell == null)
-        {
-            PreviewPath = GridPath.Invalid;
-            return PreviewPath;
-        }
+            return GridPath.Invalid;
 
         if (startCell.Coordinate == endCell.Coordinate)
-        {
-            PreviewPath = new GridPath(true, startCell.Coordinate, endCell.Coordinate, [], [], 0);
-            return PreviewPath;
-        }
+            return new GridPath(true, startCell.Coordinate, endCell.Coordinate, [], [], 0);
 
         if (IsCellOccupied(endCell.Coordinate))
-        {
-            PreviewPath = new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], [], 0);
-            return PreviewPath;
-        }
+            return new GridPath(false, startCell.Coordinate, endCell.Coordinate, [], [], 0);
 
-        var budget = -1;
-        if (_worldLogic?.SelectionContext.SourcePawn is MoveablePawn moveablePawn)
-            budget = moveablePawn.RemainingMoveBudget;
-
-        PreviewPath = GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate, budget);
-
-        return PreviewPath;
-    }
-
-    public void ClearPreviewPath()
-    {
-        PreviewPath = GridPath.Invalid;
+        return GridPathCalculator.CalculatePath(this, startCell.Coordinate, endCell.Coordinate, budget);
     }
     
     #region Helpers
@@ -228,7 +148,27 @@ public partial class GridManager : Node3D
 
     public bool IsCellOccupied(Vector2I coordinate)
     {
-        return _occupiedPositions.Values.Contains(coordinate);
+        return TryGetPawnAt(coordinate, out _);
+    }
+
+    public bool TryGetPawnAt(Vector2I coordinate, out GridPawn pawn)
+    {
+        foreach (var occupiedPosition in _occupiedPositions)
+        {
+            if (occupiedPosition.Value != coordinate)
+                continue;
+
+            pawn = occupiedPosition.Key;
+            return true;
+        }
+
+        pawn = null;
+        return false;
+    }
+
+    public GridPawn GetPawnAt(Vector2I coordinate)
+    {
+        return TryGetPawnAt(coordinate, out var pawn) ? pawn : null;
     }
     
     #endregion

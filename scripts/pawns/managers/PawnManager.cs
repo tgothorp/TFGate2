@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using TFGate2.scripts.grid;
 using TFGate2.scripts.pawns.abilities;
 using TFGate2.scripts.pawns.managers;
 
 /// <summary>
-/// Owns pawn/ability selection state and orchestrates ability resolution flow.
+/// Owns pawn registry and player-facing selection state.
 /// </summary>
 public partial class PawnManager : Node3D
 {
@@ -16,13 +15,8 @@ public partial class PawnManager : Node3D
     [Signal]
     public delegate void AbilitySelectedEventHandler(PawnAbility ability);
     
-    [Signal]
-    public delegate void AbilityResolvingEventHandler();
-
-    [Signal]
-    public delegate void AbilityResolvedEventHandler();
-
     public GridPawn SelectedPawn => _selectedPawn;
+    public PawnAbility SelectedAbility => _selectedAbility;
     public Dictionary<Guid, GridPawn> RegisteredPawns => _registeredPawns;
 
     private GridPawn _selectedPawn;
@@ -30,7 +24,6 @@ public partial class PawnManager : Node3D
 
     private PawnUiController _uiController;
     private WorldLogic _worldLogic;
-    private GridManager _gridManager;
     private Dictionary<Guid, GridPawn> _registeredPawns = new();
 
     public override void _Ready()
@@ -47,11 +40,6 @@ public partial class PawnManager : Node3D
             GD.PrintErr("WorldLogic not found!");
         }
 
-        _gridManager = GetParent<WorldLogic>()?.GetNode<GridManager>("GridManager");
-        if (_gridManager == null)
-        {
-            GD.PrintErr("GridManager not found!");
-        }
     }
 
     public Guid RegisterPawn(GridPawn pawn)
@@ -66,7 +54,7 @@ public partial class PawnManager : Node3D
     {
         _uiController.UpdatePawnData();
         
-        if (_worldLogic.SelectionContext is not {AbilityBeingResolved:true})
+        if (_worldLogic.PlayerTargetingContext is not { HasActiveAbility: true })
             _selectedPawn = pawn;
 
         EmitSignal(SignalName.PawnSelected, pawn);
@@ -77,41 +65,6 @@ public partial class PawnManager : Node3D
         _selectedAbility = ability;
 
         EmitSignal(SignalName.AbilitySelected, ability);
-    }
-
-    public void ResolveAbility(GridPawn targetPawn, GridCell targetCell, GridPath confirmedPath = null)
-    {
-        if (_selectedAbility == null || _selectedPawn == null || _worldLogic == null || _gridManager == null)
-            return;
-
-        GD.Print($"Resolving ability '{_selectedAbility.AbilityName}' for {_selectedPawn}, (pawn = {targetPawn}, targetCell = {targetCell})");
-
-        var context = new AbilityExecutionContext(
-            _worldLogic,
-            this,
-            _gridManager,
-            _selectedPawn,
-            targetPawn,
-            targetCell,
-            confirmedPath ?? GridPath.Invalid);
-
-        if (!_selectedAbility.CanExecute(context))
-        {
-            GD.PrintErr($"Ability '{_selectedAbility.AbilityName}' cannot be executed for {_selectedPawn.Name}");
-            return;
-        }
-
-        EmitSignal(SignalName.AbilityResolving);
-        _selectedAbility.AbilityFinished += OnAbilityResolved;
-        _selectedAbility.BeginExecute(context);
-        _uiController.UpdatePawnData();
-    }
-
-    private void OnAbilityResolved()
-    {
-        _selectedAbility.AbilityFinished -= OnAbilityResolved;
-        EmitSignal(SignalName.AbilityResolved);
-        DeselectAbility();
     }
 
     public void DeselectAbility()
@@ -128,5 +81,10 @@ public partial class PawnManager : Node3D
         _selectedPawn = null;
         _selectedAbility = null;
         _uiController.UpdatePawnData();
+    }
+
+    public void RefreshUi()
+    {
+        _uiController?.UpdatePawnData();
     }
 }

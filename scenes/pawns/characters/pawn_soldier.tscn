@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b80j6ptt5vgk"]
 
-[ext_resource type="Script" uid="uid://bxog3far5m862" path="res://scripts/pawns/PlayerPawn.cs" id="1_dx1g8"]
+[ext_resource type="Script" uid="uid://bxog3far5m862" path="res://scripts/pawns/CombatPawn.cs" id="1_dx1g8"]
 [ext_resource type="PackedScene" uid="uid://csf5ibsdpxp2v" path="res://scenes/pawns/abilities/ability_move_basic.tscn" id="2_dkthn"]
 [ext_resource type="PackedScene" uid="uid://bobamn27y443l" path="res://scenes/pawns/abilities/ability_shotgun.tscn" id="3_dx1g8"]
 

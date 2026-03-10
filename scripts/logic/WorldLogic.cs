@@ -1,6 +1,8 @@
 using Godot;
 using TFGate2.scripts.grid;
 using TFGate2.scripts.logic;
+using TFGate2.scripts.logic.actions;
+using TFGate2.scripts.pawns;
 using TFGate2.scripts.pawns.abilities;
 
 /// <summary>
@@ -14,98 +16,181 @@ public partial class WorldLogic : Node3D
     [Export]
     public Team CurrentTeamTurn { get; set; } = Team.Red;
 
-    public SelectionContext SelectionContext { get; set; } = new();
+    public PlayerTargetingContext PlayerTargetingContext { get; } = new();
+    public bool IsPlayerInputAllowed => CurrentTeamTurn == PlayerTeam && _actionExecutor is not { IsExecuting: true };
 
     private GridManager _gridManager;
+    private GridTargetingController _gridTargetingController;
     private PawnManager _pawnManager;
+    private ActionExecutor _actionExecutor;
 
     public override void _Ready()
     {
-        var gridManager = GetNode<GridManager>("GridManager");
-        if (gridManager == null)
+        _gridManager = GetNodeOrNull<GridManager>("GridManager");
+        if (_gridManager == null)
         {
             GD.PrintErr("GridManager not found!");
             return;
         }
-        _gridManager = gridManager;
-        _gridManager.GridCellSelected += OnGridCellSelected;
-        _gridManager.GridPathConfirmed += OnGridPathConfirmed;
 
-        var pawnManager = GetNode<PawnManager>("PawnManager");
-        if (pawnManager == null)
+        _gridTargetingController = _gridManager.GetNodeOrNull<GridTargetingController>("GridTargetingController");
+        if (_gridTargetingController == null)
+        {
+            GD.PrintErr("GridTargetingController not found!");
+            return;
+        }
+
+        _gridTargetingController.GridCellSelected += OnGridCellSelected;
+        _gridTargetingController.GridPathConfirmed += OnGridPathConfirmed;
+
+        _pawnManager = GetNodeOrNull<PawnManager>("PawnManager");
+        if (_pawnManager == null)
         {
             GD.PrintErr("PawnManager not found!");
             return;
         }
-        _pawnManager = pawnManager;
+
         _pawnManager.PawnSelected += OnPawnSelected;
-        _pawnManager.AbilityResolving += OnPawnAbilityResolutionStarted;
         _pawnManager.AbilitySelected += OnPawnAbilitySelected;
+
+        _actionExecutor = GetNodeOrNull<ActionExecutor>("ActionExecutor");
+        if (_actionExecutor == null)
+        {
+            _actionExecutor = new ActionExecutor { Name = "ActionExecutor" };
+            AddChild(_actionExecutor);
+        }
+
+        _actionExecutor.Initialize(this, _pawnManager, _gridManager);
+        _actionExecutor.ActionExecutionStarted += OnActionExecutionStarted;
+        _actionExecutor.ActionExecutionCompleted += OnActionExecutionCompleted;
+        _actionExecutor.ActionExecutionFailed += OnActionExecutionFailed;
+
+        BeginCurrentTurn();
     }
 
     private void OnGridCellSelected(GridCell cell)
     {
         GD.Print($"[WORLD-LOGIC] Cell selected: {cell.Coordinate}");
-        SelectionContext.GridCellSelected(cell);
     }
 
     private void OnGridPathConfirmed(GridPath path, GridCell targetCell)
     {
         GD.Print($"[WORLD-LOGIC] Path confirmed: {path.Start} -> {path.End}");
 
-        if (SelectionContext is not { AbilityBeingResolved: true })
+        if (PlayerTargetingContext is not { HasActiveAbility: true, SourcePawn: not null, SelectedAbility: not null })
             return;
 
         if (!path.PathIsValid)
             return;
 
-        SelectionContext.ConfirmPath(path);
-        _pawnManager.ResolveAbility(null, targetCell, path);
+        var command = new PawnActionCommand(
+            PlayerTargetingContext.SourcePawn,
+            PlayerTargetingContext.SelectedAbility,
+            targetCell: targetCell,
+            confirmedPath: path);
+
+        _actionExecutor.TryExecute(command);
     }
 
     private void OnPawnSelected(GridPawn pawn)
     {
         GD.Print($"[WORLD-LOGIC] Pawn selected: {pawn.Name}");
-        if (SelectionContext is { AbilityBeingResolved: true })
-            _pawnManager.ResolveAbility(pawn, null);
-        else
-            SelectionContext.PawnSelected(pawn);
+        if (PlayerTargetingContext is { HasActiveAbility: true, SourcePawn: not null, SelectedAbility: not null })
+        {
+            var command = new PawnActionCommand(
+                PlayerTargetingContext.SourcePawn,
+                PlayerTargetingContext.SelectedAbility,
+                targetPawn: pawn);
+
+            _actionExecutor.TryExecute(command);
+            return;
+        }
+
+        PlayerTargetingContext.PawnSelected(pawn);
     }
 
     private void OnPawnAbilitySelected(PawnAbility ability)
     {
         GD.Print($"[WORLD-LOGIC] Pawn ability selected: {ability?.AbilityName ?? "None"}");
-        SelectionContext.AbilitySelected(ability);
-        _gridManager?.ClearPreviewPath();
+        PlayerTargetingContext.AbilitySelected(ability);
+        _gridTargetingController?.ClearPreviewPath();
     }
 
-    private void OnPawnAbilityResolutionStarted()
+    private void OnActionExecutionStarted()
     {
-        GD.Print("[WORLD-LOGIC] Pawn ability resolution started");
-        SelectionContext.DisableSelection();
-        _gridManager?.ClearPreviewPath();
+        GD.Print("[WORLD-LOGIC] Action execution started");
+        PlayerTargetingContext.BeginExecutionLock();
+        _gridTargetingController?.ClearPreviewPath();
+    }
+
+    private void OnActionExecutionCompleted()
+    {
+        GD.Print("[WORLD-LOGIC] Action execution completed");
+        _pawnManager.DeselectAbility();
+        PlayerTargetingContext.CompleteAbilitySelection();
+        _gridTargetingController?.ClearPreviewPath();
+        _pawnManager.RefreshUi();
+    }
+
+    private void OnActionExecutionFailed(string reason)
+    {
+        GD.PrintErr($"[WORLD-LOGIC] Action execution failed: {reason}");
+        if (_pawnManager.SelectedAbility != null)
+            PlayerTargetingContext.AbilitySelected(_pawnManager.SelectedAbility);
     }
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event is InputEventMouseButton mouseButton)
+        if (!IsPlayerInputAllowed)
         {
-            if (mouseButton.ButtonIndex == MouseButton.Right && mouseButton.Pressed)
+            base._UnhandledInput(@event);
+            return;
+        }
+
+        if (@event is InputEventMouseButton mouseButton &&
+            mouseButton.ButtonIndex == MouseButton.Right &&
+            mouseButton.Pressed)
+        {
+            if (PlayerTargetingContext.HasActiveAbility)
             {
-                if (SelectionContext.AbilityBeingResolved)
-                {
-                    SelectionContext.AbilitySelected(null);
-                    SelectionContext.UpdateSelectionState(SelectionContext.SelectionState.AllPawns);
-                    _pawnManager.DeselectAbility();
-                }
-                else if (SelectionContext.SourcePawn != null)
-                {
-                    SelectionContext.PawnSelected(null);
-                    SelectionContext.UpdateSelectionState(SelectionContext.SelectionState.AllPawns);
-                    _pawnManager.DeselectPawn();
-                }
+                PlayerTargetingContext.CompleteAbilitySelection();
+                _pawnManager.DeselectAbility();
+                _gridTargetingController?.ClearPreviewPath();
+            }
+            else if (PlayerTargetingContext.SourcePawn != null)
+            {
+                PlayerTargetingContext.PawnSelected(null);
+                PlayerTargetingContext.UpdateSelectionState(PlayerTargetingContext.SelectionState.AllPawns);
+                _pawnManager.DeselectPawn();
             }
         }
+
         base._UnhandledInput(@event);
+    }
+
+    public void AdvanceTurn()
+    {
+        CurrentTeamTurn = CurrentTeamTurn switch
+        {
+            Team.Red => Team.Blue,
+            Team.Blue => Team.Red,
+            _ => PlayerTeam
+        };
+
+        PlayerTargetingContext.Clear();
+        _pawnManager.DeselectPawn();
+        _gridTargetingController?.ClearPreviewPath();
+        BeginCurrentTurn();
+    }
+
+    private void BeginCurrentTurn()
+    {
+        foreach (var pawn in _pawnManager.RegisteredPawns.Values)
+        {
+            if (pawn is CombatPawn combatPawn && combatPawn.Team == CurrentTeamTurn)
+                combatPawn.BeginTurn();
+        }
+
+        _pawnManager.RefreshUi();
     }
 }

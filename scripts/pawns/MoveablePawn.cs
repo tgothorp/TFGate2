@@ -29,8 +29,13 @@ public partial class MoveablePawn : GridPawn
 
     public override void _Ready()
     {
-        RemainingMoveBudget = MoveBudget;
+        BeginTurn();
         base._Ready();
+    }
+
+    public virtual void BeginTurn()
+    {
+        RemainingMoveBudget = MoveBudget;
     }
 
     public void UpdateMoveBudget(int amount)
