@@ -35,4 +35,5 @@ offset_left = -192.0
 offset_right = -0.00012207031
 offset_bottom = 1080.0
 grow_horizontal = 0
+mouse_filter = 2
 metadata/_edit_use_anchors_ = true

@@ -16,6 +16,9 @@ public partial class WorldLogic : Node3D
     [Export]
     public Team CurrentTeamTurn { get; set; } = Team.Red;
 
+    [Export]
+    public WorldLogicUiController UiController { get; set; }
+
     public PlayerTargetingContext PlayerTargetingContext { get; } = new();
     public bool IsPlayerInputAllowed => CurrentTeamTurn == PlayerTeam && _actionExecutor is not { IsExecuting: true };
 
@@ -177,9 +180,12 @@ public partial class WorldLogic : Node3D
             _ => PlayerTeam
         };
 
+        GD.Print($"[WORLD-LOGIC] Advancing turn to {CurrentTeamTurn}");
+
         PlayerTargetingContext.Clear();
         _pawnManager.DeselectPawn();
         _gridTargetingController?.ClearPreviewPath();
+        UiController.TurnAdvanced();
         BeginCurrentTurn();
     }
 

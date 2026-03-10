@@ -9,6 +9,7 @@
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_2nowl"]
 
 [node name="PawnSoldier" type="CharacterBody3D" unique_id=920060864 node_paths=PackedStringArray("CollisionShape")]
+collision_layer = 3
 script = ExtResource("1_dx1g8")
 Class = 1
 CanTakeAction = true

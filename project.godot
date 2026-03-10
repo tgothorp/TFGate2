@@ -77,6 +77,11 @@ rotate={
 ]
 }
 
+[layer_names]
+
+3d_physics/layer_1="grid_pawns"
+3d_physics/layer_2="grid_pawns_characters"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

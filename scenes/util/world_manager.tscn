@@ -1,6 +1,46 @@
 [gd_scene format=3 uid="uid://s8aqp1jhpd45"]
 
 [ext_resource type="Script" uid="uid://cp5wnccvyogsn" path="res://scripts/logic/WorldLogic.cs" id="1_r7btl"]
+[ext_resource type="Script" uid="uid://8qawjsfhqj5u" path="res://scripts/logic/WorldLogicUiController.cs" id="2_y5u34"]
 
-[node name="WorldManager" type="Node3D" unique_id=1136868959]
+[node name="WorldManager" type="Node3D" unique_id=1136868959 node_paths=PackedStringArray("UiController")]
 script = ExtResource("1_r7btl")
+UiController = NodePath("WorldUiController")
+
+[node name="WorldUiController" type="Control" parent="." unique_id=1793935163 node_paths=PackedStringArray("TeamLabel", "PassTurnButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_y5u34")
+TeamLabel = NodePath("TeamLabel")
+PassTurnButton = NodePath("PassTurnButton")
+
+[node name="TeamLabel" type="Label" parent="WorldUiController" unique_id=882480431]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -46.0
+offset_right = 46.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "TEAM TURN"
+
+[node name="PassTurnButton" type="Button" parent="WorldUiController" unique_id=296089266]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -106.0
+offset_top = -20.0
+offset_right = -6.0
+offset_bottom = -6.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Pass Turn"
