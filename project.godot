@@ -13,12 +13,14 @@ config_version=5
 config/name="TFGate2"
 run/main_scene="uid://bw4r0dd6fip33"
 config/features=PackedStringArray("4.6", "C#", "Forward Plus")
+run/max_fps=240
 config/icon="res://icon.svg"
 
 [autoload]
 
 UserSettings="*uid://d33uio86qnyv6"
 SignalBus="*uid://caowv8c6yvykx"
+DebugMenu="*uid://cggqb75a8w8r"
 
 [display]
 
@@ -28,6 +30,10 @@ window/size/viewport_height=1080
 [dotnet]
 
 project/assembly_name="TFGate2"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/debug_menu/plugin.cfg")
 
 [input]
 

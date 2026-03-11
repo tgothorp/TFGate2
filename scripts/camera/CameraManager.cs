@@ -6,12 +6,14 @@ using TFGate2.scripts.extensions;
 /// </summary>
 public partial class CameraManager : Node3D
 {
+    private const float ReferenceFps = 60.0f;
+
     public Node3D RotationX { get; set; }
     public Node3D ZoomPivot { get; set; }
     public Camera3D Camera { get; set; }
 
     [Export]
-    public float MoveSpeed { get; set; } = 0.2f;
+    public float MoveSpeed { get; set; } = 0.75f;
 
     [Export]
     public float RotationSpeed { get; set; } = 1.5f;
@@ -43,6 +45,11 @@ public partial class CameraManager : Node3D
     private float _zoomTarget;
     private float _zoomMin = -20.0f;
     private float _zoomMax = 20.0f;
+
+    private static float GetDeltaScaledLerpWeight(float perFrameWeight, double delta)
+    {
+        return 1.0f - Mathf.Pow(1.0f - perFrameWeight, (float)delta * ReferenceFps);
+    }
 
     public override void _Ready()
     {
@@ -98,8 +105,10 @@ public partial class CameraManager : Node3D
         base._UnhandledInput(@event);
     }
 
-    public override void _Process(double delta)
+    public override void _PhysicsProcess(double delta)
     {
+        var deltaSeconds = (float)delta;
+
         if (Input.IsActionJustPressed("rotate"))
             Input.SetMouseMode(Input.MouseModeEnum.Captured);
 
@@ -114,20 +123,23 @@ public partial class CameraManager : Node3D
         var moveDirection = (Transform.Basis * new Vector3(inputDirection.X, 0, inputDirection.Y)).Normalized();
 
         // set target
-        _moveTarget += MoveSpeed * moveDirection;
-        _rotationTarget += rotationAxis * RotationSpeed;
+        _moveTarget += MoveSpeed * moveDirection * deltaSeconds * ReferenceFps;
+        _rotationTarget += rotationAxis * RotationSpeed * deltaSeconds * ReferenceFps;
         _zoomTarget += zoomDirection * ZoomSpeed;
         _zoomTarget = Mathf.Clamp(_zoomTarget, _zoomMin, _zoomMax);
 
         // interp
-        Position = Vector3Extensions.Lerp(Position, _moveTarget, 0.05f);
+        var moveLerpWeight = GetDeltaScaledLerpWeight(0.05f, delta);
+        Position = Vector3Extensions.Lerp(Position, _moveTarget, moveLerpWeight);
 
-        var rotationY = Mathf.Lerp(RotationDegrees.Y, _rotationTarget, 0.1f);
+        var rotationLerpWeight = GetDeltaScaledLerpWeight(0.1f, delta);
+        var rotationY = Mathf.Lerp(RotationDegrees.Y, _rotationTarget, rotationLerpWeight);
         RotationDegrees = new Vector3(RotationDegrees.X, rotationY, RotationDegrees.Z);
 
-        var cameraZ = Mathf.Lerp(Camera.Position.Z, _zoomTarget, 0.10f);
+        var zoomLerpWeight = GetDeltaScaledLerpWeight(0.10f, delta);
+        var cameraZ = Mathf.Lerp(Camera.Position.Z, _zoomTarget, zoomLerpWeight);
         Camera.Position = new Vector3(Camera.Position.X, Camera.Position.Y, cameraZ);
 
-        base._Process(delta);
+        base._PhysicsProcess(delta);
     }
 }
